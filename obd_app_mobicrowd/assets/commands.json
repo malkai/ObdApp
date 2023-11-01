@@ -1,0 +1,69 @@
+[
+{
+    "PID": "01 0C",
+    "length": 2,
+    "title": "rotacao",
+    "unit": "RPM",
+    "description": "<double>, (( [0] * 256) + [1] ) / 4",
+    "status": true
+},
+{
+    "PID": "01 0D",
+    "length": 1,
+    "title": "velocidade",
+    "unit": "Km/h",
+    "description": "<int>, [0]",
+    "status": true
+},
+{
+    "PID": "01 05",
+    "length": 1,
+    "title": "temperatura do liquido de arrefecimento",
+    "unit": "°C",
+    "description": "<int>, ( [0] - 40 )",
+    "status": true
+},
+{
+    "PID": "01 0B",
+    "length": 1,
+    "title": "pressao absoluta do coletor de admissao",
+    "unit": "kPa",
+    "description": "<int>, [0]",
+    "status": true
+},
+{
+    "PID": "09 02 5",
+    "length": 5,
+    "title": "VIN",
+    "unit": "",
+    "description": "<String>",
+    "status": true
+},
+{
+    "PID": "01 0F",
+"(0xFF26242e)": "(0xFF26242e)"    },
+{
+    "PID": "01 10",
+    "length": 2,
+    "title": "fluxo de massa de ar (MAF)",
+    "unit": "g/s",
+    "description": "<double>, (( [0] * 256 ) + [1] ) / 100",
+    "status": true
+},
+{
+    "PID": "01 2F",
+    "length": 1,
+    "title": "nivel de combustivel",
+    "unit": "%",
+    "description": "<int>, ( [0] * 100 ) / 255",
+    "status": true
+},
+{
+    "PID": "01 A6",
+    "length": 4,
+    "title": "odometro",
+    "unit": "km",
+    "description": "<int>, ( ( [0] * 16777216 ) + ( [1] * 65536 ) + ( [2] * 256 ) + [3] ) / 10",
+    "status": true
+}
+]
