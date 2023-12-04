@@ -62,34 +62,17 @@ class Vin {
   List farrk;
 
   @HiveField(14)
-  double m;
-  @HiveField(15)
-  double c;
-  @HiveField(16)
-  double rquare;
-  @HiveField(17)
-  double m2;
-  @HiveField(18)
-  double c2;
-  @HiveField(19)
-  double rquare2;
-
-  @HiveField(20)
-  List fuelk;
-  @HiveField(21)
-  List fuels;
-  @HiveField(22)
   List fuelkf;
-  @HiveField(23)
-  List fuelsf;
 
-  @HiveField(24)
+  //fuelsf: auxf[1],
+
+  @HiveField(15)
   double percentdata;
 
-  @HiveField(25)
+  @HiveField(16)
   DateTime time = DateTime.now();
 
-  @HiveField(26)
+  @HiveField(17)
   List points = [];
 
   Vin({
@@ -107,17 +90,8 @@ class Vin {
     required this.kmaccv,
     required this.kmaccarrv,
     required this.farrk,
-    required this.m,
-    required this.c,
-    required this.rquare,
-    required this.m2,
-    required this.c2,
-    required this.rquare2,
-    required this.fuelk,
-    required this.fuels,
     required this.percentdata,
     required this.fuelkf,
-    required this.fuelsf,
     required this.points,
   });
 }

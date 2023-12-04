@@ -50,7 +50,7 @@ class AppRouter extends _i7.RootStackRouter {
           key: args.key,
           obd2: args.obd2,
           turnOBD_OFF: args.turnOBD_OFF,
-          logic: args.help,
+          logic: args.logic,
         ),
       );
     },
@@ -160,7 +160,7 @@ class Obddtarouter extends _i7.PageRouteInfo<ObddtarouterArgs> {
     _i8.Key? key,
     required _i9.ObdPlugin obd2,
     required dynamic Function() turnOBD_OFF,
-    required bool help,
+    required bool logic,
   }) : super(
           Obddtarouter.name,
           path: '/obddta:obd2',
@@ -168,7 +168,7 @@ class Obddtarouter extends _i7.PageRouteInfo<ObddtarouterArgs> {
             key: key,
             obd2: obd2,
             turnOBD_OFF: turnOBD_OFF,
-            help: help,
+            logic: logic,
           ),
         );
 
@@ -180,7 +180,7 @@ class ObddtarouterArgs {
     this.key,
     required this.obd2,
     required this.turnOBD_OFF,
-    required this.help,
+    required this.logic,
   });
 
   final _i8.Key? key;
@@ -189,11 +189,11 @@ class ObddtarouterArgs {
 
   final dynamic Function() turnOBD_OFF;
 
-  final bool help;
+  final bool logic;
 
   @override
   String toString() {
-    return 'ObddtarouterArgs{key: $key, obd2: $obd2, turnOBD_OFF: $turnOBD_OFF, help: $help}';
+    return 'ObddtarouterArgs{key: $key, obd2: $obd2, turnOBD_OFF: $turnOBD_OFF, logic: $logic}';
   }
 }
 

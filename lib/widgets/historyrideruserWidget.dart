@@ -50,10 +50,8 @@ class _ObdDataMapState extends State<HistoryRideUser> {
           kmData(aux.vehicle.kmaccarre[i], aux.vehicle.taccarr[i].toString()));
       infokm3.add(
           kmData(aux.vehicle.kmaccarrv[i], aux.vehicle.taccarr[i].toString()));
-      infof.add(fuelData(aux.vehicle.farrk[i], aux.vehicle.fuelkf[i],
-          aux.vehicle.fuelk[i], aux.vehicle.taccarr[i]));
-      infof2.add(fuelData(aux.vehicle.farrk[i], aux.vehicle.fuelsf[i],
-          aux.vehicle.fuels[i], aux.vehicle.taccarr[i]));
+      infof.add(fuelData(
+          aux.vehicle.farrk[i], aux.vehicle.fuelkf[i], aux.vehicle.taccarr[i]));
     }
     setState(
       () {
@@ -107,26 +105,6 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                     )
                   ]),
                 ],
-                /*
-                layers: [
-                  TileLayerOptions(
-                    maxZoom: 19,
-                    urlTemplate:
-                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
-                    userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-                  ),
-                  PolylineLayerOptions(
-                    polylineCulling: false,
-                    polylines: [
-                      Polyline(
-                        strokeWidth: 5,
-                        points: lat,
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
-                ],*/
               ),
             ),
             Container(
@@ -292,12 +270,6 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                             data.time.toString(),
                                         yValueMapper: (fuelData data, _) =>
                                             data.fuelf),
-                                    LineSeries<fuelData, String>(
-                                        dataSource: infof,
-                                        xValueMapper: (fuelData data, _) =>
-                                            data.time.toString(),
-                                        yValueMapper: (fuelData data, _) =>
-                                            data.fuelrl),
                                   ],
                                 ),
                               ],
@@ -326,12 +298,6 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                             data.time.toString(),
                                         yValueMapper: (fuelData data, _) =>
                                             data.fuelf),
-                                    LineSeries<fuelData, String>(
-                                        dataSource: infof,
-                                        xValueMapper: (fuelData data, _) =>
-                                            data.time.toString(),
-                                        yValueMapper: (fuelData data, _) =>
-                                            data.fuelrl),
                                   ],
                                 ),
                               ],
@@ -370,9 +336,8 @@ class kmData {
 }
 
 class fuelData {
-  fuelData(this.fuel, this.fuelf, this.fuelrl, this.time);
+  fuelData(this.fuel, this.fuelf, this.time);
   final double fuel;
   final double fuelf;
-  final double fuelrl;
   final double time;
 }

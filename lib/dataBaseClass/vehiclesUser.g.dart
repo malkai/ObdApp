@@ -68,25 +68,16 @@ class VinAdapter extends TypeAdapter<Vin> {
       kmaccv: fields[11] as double,
       kmaccarrv: (fields[12] as List).cast<dynamic>(),
       farrk: (fields[13] as List).cast<dynamic>(),
-      m: fields[14] as double,
-      c: fields[15] as double,
-      rquare: fields[16] as double,
-      m2: fields[17] as double,
-      c2: fields[18] as double,
-      rquare2: fields[19] as double,
-      fuelk: (fields[20] as List).cast<dynamic>(),
-      fuels: (fields[21] as List).cast<dynamic>(),
-      percentdata: fields[24] as double,
-      fuelkf: (fields[22] as List).cast<dynamic>(),
-      fuelsf: (fields[23] as List).cast<dynamic>(),
-      points: (fields[26] as List).cast<dynamic>(),
-    )..time = fields[25] as DateTime;
+      percentdata: fields[15] as double,
+      fuelkf: (fields[14] as List).cast<dynamic>(),
+      points: (fields[17] as List).cast<dynamic>(),
+    )..time = fields[16] as DateTime;
   }
 
   @override
   void write(BinaryWriter writer, Vin obj) {
     writer
-      ..writeByte(27)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -116,30 +107,12 @@ class VinAdapter extends TypeAdapter<Vin> {
       ..writeByte(13)
       ..write(obj.farrk)
       ..writeByte(14)
-      ..write(obj.m)
-      ..writeByte(15)
-      ..write(obj.c)
-      ..writeByte(16)
-      ..write(obj.rquare)
-      ..writeByte(17)
-      ..write(obj.m2)
-      ..writeByte(18)
-      ..write(obj.c2)
-      ..writeByte(19)
-      ..write(obj.rquare2)
-      ..writeByte(20)
-      ..write(obj.fuelk)
-      ..writeByte(21)
-      ..write(obj.fuels)
-      ..writeByte(22)
       ..write(obj.fuelkf)
-      ..writeByte(23)
-      ..write(obj.fuelsf)
-      ..writeByte(24)
+      ..writeByte(15)
       ..write(obj.percentdata)
-      ..writeByte(25)
+      ..writeByte(16)
       ..write(obj.time)
-      ..writeByte(26)
+      ..writeByte(17)
       ..write(obj.points);
   }
 

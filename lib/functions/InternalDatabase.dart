@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:haversine_distance/haversine_distance.dart';
@@ -116,11 +117,11 @@ class InternalDatabase {
     return 0;
   }
 
-  List<List> filterapply(List farrk) {
+  List filterapply(List farrk) {
     List af1 = insertEventInstance.kalmanfilter(farrk);
-    List af2 = insertEventInstance.apply_savitzky(farrk);
+    //List af2 = insertEventInstance.apply_savitzky(farrk);
 
-    return [af1, af2];
+    return af1;
   }
 
   void getDataOff(Map map) async {
@@ -210,11 +211,11 @@ class InternalDatabase {
           taccarr.add(tacc.toDouble());
 
           //math haversine
-          var deltkmha = haversineDistance.haversine(start, end, Unit.KM);
+          //var deltkmha = haversineDistance.haversine(start, end, Unit.KM);
 
-          kmacch += deltkmha.toDouble();
-          kmarrh.add(deltkmha.toDouble());
-          kmaccarrh.add(kmacch.toDouble());
+          //kmacch += deltkmha.toDouble();
+          //kmarrh.add(deltkmha.toDouble());
+          //kmaccarrh.add(kmacch.toDouble());
 
           //math euclidean
           int R = 6371;
@@ -268,20 +269,21 @@ class InternalDatabase {
         if (kmarrv.length > 1 && farrk.length > 1) {
           List linear = insertEventInstance.regressionLinear1(taccarr, kmarrv);
 
-          kmarrv = linear[0];
-          kmaccv = linear[1];
-          kmaccarrv = linear[2];
+          //kmarrv = linear[0];
+          //kmaccv = linear[1];
+          //kmaccarrv = linear[2];
 
-          linear = insertEventInstance.regressionLinear1(taccarr, farrk);
-          farrk = linear[0];
+          //linear = insertEventInstance.regressionLinear1(taccarr, farrk);
+          //farrk = linear[0];
 
-          List auxf = await filterapply(farrk);
+          List auxf = insertEventInstance.kalmanfilter(farrk);
 
+          /*
           List fuelregressionk =
               insertEventInstance.regressionLinear2(taccarr, auxf[0]);
           List fuelregressions =
               insertEventInstance.regressionLinear2(taccarr, auxf[1]);
-
+          */
           var b = Vin(
               id: vin1,
               tarr: tarr,
@@ -297,16 +299,7 @@ class InternalDatabase {
               kmaccv: kmaccv,
               kmaccarrv: kmaccarrv,
               farrk: farrk,
-              fuelk: fuelregressionk[0],
-              fuels: fuelregressions[0],
               fuelkf: auxf[0],
-              fuelsf: auxf[1],
-              m: fuelregressionk[1],
-              c: fuelregressionk[2],
-              rquare: fuelregressionk[3],
-              m2: fuelregressions[1],
-              c2: fuelregressions[2],
-              rquare2: fuelregressions[3],
               points: points,
               percentdata: p / order.length * 100);
 

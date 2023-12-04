@@ -85,7 +85,7 @@ class _FloatState extends State<InitBluetooth> {
                             context.router.popAndPush(Obddtarouter(
                                 obd2: obd2,
                                 turnOBD_OFF: turnOBD_OFF,
-                                help: help));
+                                logic: help));
                           } catch (e) {
                             print(e);
                           }
@@ -125,7 +125,7 @@ class _FloatState extends State<InitBluetooth> {
                           await obd2.getPairedDevices;
                       if (confdata.on == true) {
                         context.router.push(Obddtarouter(
-                            obd2: obd2, turnOBD_OFF: turnOBD_OFF, help: help));
+                            obd2: obd2, turnOBD_OFF: turnOBD_OFF, logic: help));
                       } else {
                         if (!(await obd2.isBluetoothEnable)) {
                           await obd2.enableBluetooth;

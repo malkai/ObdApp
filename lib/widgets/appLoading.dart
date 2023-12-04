@@ -79,7 +79,12 @@ class _AppLoadingState extends State<AppLoading> {
     if (process.isNotEmpty) {
       final diretorioUsuario =
           await path_prov.getApplicationDocumentsDirectory();
-      sendData(diretorioUsuario.path);
+      //sendData(diretorioUsuario.path);
+      var bancoInterno = InternalDatabase();
+      Map map = {
+        "data": diretorioUsuario,
+      };
+      bancoInterno.getDataOff(map);
     }
   }
 
