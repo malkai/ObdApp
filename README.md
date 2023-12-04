@@ -9,7 +9,7 @@ A terceira ação consiste em simular aleatoriamente os comandos que o OBD pode 
 
 Figura 1: Ações do usuário no sistema Mobile
 
-![Alt text](condutor.png)
+![condutor](condutor.png)
 
 
 
@@ -17,4 +17,4 @@ A Figura 2 representa a interação do condutor com o aplicativo. O processo com
 
 Figura 2: Ações do usuário no sistema aplicativo mobile
 
-![Alt text](fluxodeintera%C3%A7%C3%A3o.png)
+![fluxo](fluxodeintera%C3%A7%C3%A3o.png)
