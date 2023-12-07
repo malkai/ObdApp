@@ -1,19 +1,19 @@
 import 'dart:math';
 
 class InternalMath {
-  List calc(var rpm, pressure_intake, temp_intake, vs, km) {
-    double density_gasoline = 737; // Density of gasoline 737g/L -> 7,37g/L
-    int density_diesel = 850; // Density of diesel 737g/L
-    int density_ethanol = 789; // Density of ethanol 737g/L
+  List calc(var rpm, pressureIntake, tempIntake, vs, km) {
+    double densityGasoline = 737; // Density of gasoline 737g/L -> 7,37g/L
+    int densityDiesel = 850; // Density of diesel 737g/L
+    int densityEthanol = 789; // Density of ethanol 737g/L
 
-    double co2_per_gasoline =
+    double co2PerGasoline =
         2310; // co2 per liter of gasoline g/L 2310 -> 23,10
-    int co2_per_diesel = 2660; // co2 per liter of diesel g/L
-    int co2_per_ethanol = 1519; // co2 per liter of ethanol g/L
+    int co2PerDiesel = 2660; // co2 per liter of diesel g/L
+    int co2PerEthanol = 1519; // co2 per liter of ethanol g/L
 
-    double AFR_gasoline = 14.7; // AFR constant for gasoline
-    double AFR_diesel = 14.6; // AFR constant for diesel
-    double AFR_ethanol = 9.1; // AFR constant for ethanol
+    double afrGasoline = 14.7; // AFR constant for gasoline
+    double afrDiesel = 14.6; // AFR constant for diesel
+    double afrEthanol = 9.1; // AFR constant for ethanol
 //3924/33957
     //Vintake represents the real volume of intake air supported by the cylinders.
     int Vintake = 400;
@@ -21,11 +21,11 @@ class InternalMath {
     //Vnominal is the theoretical volume of the engine.
     int Vnominal = 500;
 
-    double mass_air = 28.96; //massa molar do ar
+    double massAir = 28.96; //massa molar do ar
 
     //Equation (12)
     //On the article the value volumetric eficiency
-    double volumetric_efficiency = 0.8;
+    double volumetricEfficiency = 0.8;
 
     //the volume of the combustion chambers in the engine cylinders
     int V = 50;
@@ -34,30 +34,30 @@ class InternalMath {
 
     //Pressure_intake represents the pressure in the combustion chamber and can be obtained by means of the MAP (Manifold Absolute Pressure) sensor in KPa.
     //Temp_intake T is the gas temperature. It can be obtained by the IAT (Intake Absolute Temperature) sensor in K.
-    double f_imap = rpm * (pressure_intake / temp_intake / 2);
+    double fImap = rpm * (pressureIntake / tempIntake / 2);
     double massOfAirFlow2 =
-        f_imap * volumetric_efficiency * 1.984 * 28.97 / 8.314;
+        fImap * volumetricEfficiency * 1.984 * 28.97 / 8.314;
 
     //Equation (14)
     //double massOfAirFlow = ((pressure_intake * V) / (1000 * R * temp_intake)) * (mass_air * volumetric_efficiency * rpm / 120);
-    double massOfAirFlow = (pressure_intake * V / (1000 * R * temp_intake)) *
-        (mass_air * volumetric_efficiency * rpm / 120);
+    double massOfAirFlow = (pressureIntake * V / (1000 * R * tempIntake)) *
+        (massAir * volumetricEfficiency * rpm / 120);
 
     double fuelflow1 =
-        ((massOfAirFlow * 3600) / (AFR_gasoline * density_gasoline)) /
+        ((massOfAirFlow * 3600) / (afrGasoline * densityGasoline)) /
             10; //[l/h]
 
-    double sfc = vs / (massOfAirFlow / AFR_gasoline);
+    double sfc = vs / (massOfAirFlow / afrGasoline);
 //4284
 //214.782889
 
 //https://stackoverflow.com/questions/17170646/what-is-the-best-way-to-get-fuel-consumption-mpg-using-obd2-parameters
     //double fuel_Consuption = (sfc) * (1 / 2.7);
 
-    double fuel_Consuption2 =
-        (massOfAirFlow / AFR_gasoline * density_gasoline) / vs;
+    double fuelConsuption2 =
+        (massOfAirFlow / afrGasoline * densityGasoline) / vs;
 
-    double fuel_Consuption3 = (fuelflow1) / vs;
+    double fuelConsuption3 = (fuelflow1) / vs;
 
     //print('mass');
     //   print([
@@ -70,14 +70,14 @@ class InternalMath {
     //  ]);
 
     //Equation (6)
-    double mass_co2 =
-        massOfAirFlow / (AFR_gasoline * density_gasoline) * co2_per_gasoline;
+    double massCo2 =
+        massOfAirFlow / (afrGasoline * densityGasoline) * co2PerGasoline;
 
     //double gasoline = (7.718 * vs / massOfAirFlow) * 0.425144;
 
     //print([massOfAirFlow, vs, fuel_Consuption3]);
 
-    return [mass_co2, fuel_Consuption3];
+    return [massCo2, fuelConsuption3];
   }
 
   //Linear interpolation
@@ -86,16 +86,16 @@ class InternalMath {
 
     double acca = a.reduce((a, b) => a + b);
     double accb = b.reduce((a, b) => a + b);
-    double mean_a = acca / a.length;
-    double mean_b = accb / b.length;
+    double meanA = acca / a.length;
+    double meanB = accb / b.length;
     List helpa = [], helpb = [];
 
     //print(a.length);
     //print(b.length);
 
     for (int i = 0; i < b.length - 1; i++) {
-      helpa.add(a[i] - mean_a);
-      helpb.add(b[i] - mean_b);
+      helpa.add(a[i] - meanA);
+      helpb.add(b[i] - meanB);
     }
 
     for (int i = 0; i < b.length - 1; i++) {
@@ -104,7 +104,7 @@ class InternalMath {
     }
 
     double m = accb / acca;
-    double cc = mean_b - (m * mean_a);
+    double cc = meanB - (m * meanA);
 
     for (int i = 0; i < b.length - 1; i++) {
       c.add((m * a[i]) + cc);
@@ -128,13 +128,13 @@ class InternalMath {
 
     double acca = a.reduce((a, b) => a + b);
     double accb = b.reduce((a, b) => a + b);
-    double mean_a = acca / a.length;
-    double mean_b = accb / b.length;
+    double meanA = acca / a.length;
+    double meanB = accb / b.length;
     List helpa = [], helpb = [];
 
     for (int i = 0; i <= b.length - 1; i++) {
-      helpa.add(a[i] - mean_a);
-      helpb.add(b[i] - mean_b);
+      helpa.add(a[i] - meanA);
+      helpb.add(b[i] - meanB);
     }
 
     for (int i = 0; i <= b.length - 1; i++) {
@@ -143,18 +143,18 @@ class InternalMath {
     }
 
     double m = accb / acca;
-    double cc = mean_b - (m * mean_a);
+    double cc = meanB - (m * meanA);
 
     for (int i = 0; i < a.length; i++) {
       c.add((m * a[i]) + cc);
     }
 
     for (int i = 0; i < a.length; i++) {
-      acca = acca + ((c[i] - mean_b) * (c[i] - mean_b));
+      acca = acca + ((c[i] - meanB) * (c[i] - meanB));
     }
 
     for (int i = 0; i < b.length - 1; i++) {
-      accb = accb + ((b[i] - mean_b) * (b[i] - mean_b));
+      accb = accb + ((b[i] - meanB) * (b[i] - meanB));
     }
 
     double R = 1 - (acca / accb);
@@ -520,7 +520,7 @@ class InternalMath {
 
     var n = farrk.length;
 
-    List data_copy = [];
+    List dataCopy = [];
 
     var sum = 0.0;
 
@@ -556,16 +556,13 @@ class InternalMath {
       var p11 = (1 - k1) * sumsie;
 
       sumsie = p11 + exec2;
-      data_copy.add(x11);
+      dataCopy.add(x11);
     }
 
-    return data_copy;
+    return dataCopy;
   }
 
   bool isNumeric(String s) {
-    if (s == null) {
-      return false;
-    }
     return double.tryParse(s) != null;
   }
 }

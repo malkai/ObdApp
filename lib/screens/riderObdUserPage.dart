@@ -8,6 +8,6 @@ class Ride extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InitBluetooth();
+    return const InitBluetooth();
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:obd_app_mobicrowd/widgets/textWidget.dart';
 
 import '../dataBaseClass/confSimu.dart';
 
@@ -88,8 +87,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               children: [
                                 Container(
                                     padding:
-                                        EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                    child: Text('Simulador OBD')),
+                                        const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                    child: const Text('Simulador OBD')),
                                 Switch(
                                     value: confdata.on,
                                     onChanged: (value) {
@@ -100,8 +99,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               ],
                             ),
                             Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                child: Text('Velocidade KM/H')),
+                                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Velocidade KM/H')),
                             RangeSlider(
                               values: RangeValues(confdata.velomin.toDouble(),
                                   confdata.velomax.toDouble()),
@@ -120,8 +119,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ),
                             Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                child: Text('RPM')),
+                                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('RPM')),
                             RangeSlider(
                               values: RangeValues(confdata.rpmmin.toDouble(),
                                   confdata.rpmmax.toDouble()),
@@ -140,8 +139,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ),
                             Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                child: Text(
+                                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text(
                                     'Temperatura do liquido de arrefecimento')),
                             RangeSlider(
                               values: RangeValues(
@@ -161,8 +160,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ),
                             Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                child: Text(
+                                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text(
                                     'Pressão absoluta do coletor de admissão')),
                             RangeSlider(
                               values: RangeValues(
@@ -182,8 +181,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ),
                             Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                child: Text('Temperatura do ar de entrada')),
+                                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Temperatura do ar de entrada')),
                             RangeSlider(
                               values: RangeValues(
                                   confdata.tempaemin, confdata.tempaemax),
@@ -202,8 +201,8 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ),
                             Container(
-                                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                child: Text('Nivel de combustivel')),
+                                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Nivel de combustivel')),
                             RangeSlider(
                               values: RangeValues(
                                   confdata.percentmin.toDouble(),
@@ -226,7 +225,7 @@ class _ConfwidgetState extends State<Confwidget> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 ElevatedButton(
-                                  child: Text(
+                                  child: const Text(
                                     'Salvar',
                                     style: TextStyle(fontSize: 20.0),
                                   ),

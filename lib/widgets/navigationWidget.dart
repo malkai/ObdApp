@@ -21,7 +21,7 @@ class _BottonWidgetState extends State<BottonWidget> {
         unselectedItemColor: Colors.grey.withOpacity(0.5),
         currentIndex: widget.tabsRouter.activeIndex,
         onTap: widget.tabsRouter.setActiveIndex,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Corrida',

@@ -14,7 +14,7 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> {
   static const maxMarkersCount = 5000;
   List<Marker> allMarkers = [];
-  int _sliderVal = maxMarkersCount ~/ 10;
+  final int _sliderVal = maxMarkersCount ~/ 10;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _MapWidgetState extends State<MapWidget> {
           TileLayer(
             maxZoom: 19,
             urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            subdomains: ['a', 'b', 'c'],
+            subdomains: const ['a', 'b', 'c'],
             userAgentPackageName: 'dev.fleaflet.flutter_map.example',
           ),
           MarkerLayer(

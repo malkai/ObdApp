@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../functions/obdPlugin.dart';
-import '../widgets/initBluetooth.dart';
 import '../widgets/obdDataBoxWidget.dart';
 
 class OBDdata extends StatefulWidget {

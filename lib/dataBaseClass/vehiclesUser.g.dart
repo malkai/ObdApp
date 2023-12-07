@@ -58,26 +58,23 @@ class VinAdapter extends TypeAdapter<Vin> {
       tarr: (fields[1] as List).cast<dynamic>(),
       tacc: fields[2] as double,
       taccarr: (fields[3] as List).cast<dynamic>(),
-      kmarrh: (fields[4] as List).cast<dynamic>(),
-      kmacch: fields[5] as double,
-      kmaccarrh: (fields[6] as List).cast<dynamic>(),
-      kmarre: (fields[7] as List).cast<dynamic>(),
-      kmacce: fields[8] as double,
-      kmaccarre: (fields[9] as List).cast<dynamic>(),
-      kmarrv: (fields[10] as List).cast<dynamic>(),
-      kmaccv: fields[11] as double,
-      kmaccarrv: (fields[12] as List).cast<dynamic>(),
-      farrk: (fields[13] as List).cast<dynamic>(),
-      percentdata: fields[15] as double,
-      fuelkf: (fields[14] as List).cast<dynamic>(),
-      points: (fields[17] as List).cast<dynamic>(),
-    )..time = fields[16] as DateTime;
+      kmarre: (fields[4] as List).cast<dynamic>(),
+      kmacce: fields[5] as double,
+      kmaccarre: (fields[6] as List).cast<dynamic>(),
+      kmarrv: (fields[7] as List).cast<dynamic>(),
+      kmaccv: fields[8] as double,
+      kmaccarrv: (fields[9] as List).cast<dynamic>(),
+      farrk: (fields[10] as List).cast<dynamic>(),
+      percentdata: fields[12] as double,
+      fuelkf: (fields[11] as List).cast<dynamic>(),
+      points: (fields[14] as List).cast<dynamic>(),
+    )..time = fields[13] as DateTime;
   }
 
   @override
   void write(BinaryWriter writer, Vin obj) {
     writer
-      ..writeByte(18)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -87,32 +84,26 @@ class VinAdapter extends TypeAdapter<Vin> {
       ..writeByte(3)
       ..write(obj.taccarr)
       ..writeByte(4)
-      ..write(obj.kmarrh)
-      ..writeByte(5)
-      ..write(obj.kmacch)
-      ..writeByte(6)
-      ..write(obj.kmaccarrh)
-      ..writeByte(7)
       ..write(obj.kmarre)
-      ..writeByte(8)
+      ..writeByte(5)
       ..write(obj.kmacce)
-      ..writeByte(9)
+      ..writeByte(6)
       ..write(obj.kmaccarre)
-      ..writeByte(10)
+      ..writeByte(7)
       ..write(obj.kmarrv)
-      ..writeByte(11)
+      ..writeByte(8)
       ..write(obj.kmaccv)
-      ..writeByte(12)
+      ..writeByte(9)
       ..write(obj.kmaccarrv)
-      ..writeByte(13)
+      ..writeByte(10)
       ..write(obj.farrk)
-      ..writeByte(14)
+      ..writeByte(11)
       ..write(obj.fuelkf)
-      ..writeByte(15)
+      ..writeByte(12)
       ..write(obj.percentdata)
-      ..writeByte(16)
+      ..writeByte(13)
       ..write(obj.time)
-      ..writeByte(17)
+      ..writeByte(14)
       ..write(obj.points);
   }
 

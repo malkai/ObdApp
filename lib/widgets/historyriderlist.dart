@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
 import '../dataBaseClass/vehiclesUser.dart';
-import 'historyRiderUserWidget.dart';
 import 'package:intl/intl.dart';
-
+import '../widgets/historyrideruserWidget.dart';
 class HistoryUserWidget extends StatefulWidget {
   const HistoryUserWidget({Key? key}) : super(key: key);
 
@@ -20,6 +19,8 @@ class _HistoryUserState extends State<HistoryUserWidget> {
   Future<List> aux() async {
     var bb = await path_prov.getApplicationDocumentsDirectory();
     Box teste = await Hive.openBox<UserVehicles>('userdata', path: bb.path);
+    print('testeuserdata');
+    print(teste);
 
     List help = teste.values.toList();
     return help;
@@ -70,8 +71,8 @@ class _HistoryUserState extends State<HistoryUserWidget> {
                     itemBuilder: (context, i) {
                       return GestureDetector(
                         onDoubleTap: () {
-                          if (help1[i].vehicle.kmarrh.length > 0 &&
-                              help1[i].vehicle.kmacch > 0) {}
+                          if (help1[i].vehicle.kmarre.length > 0 &&
+                              help1[i].vehicle.kmacce > 0) {}
                           setState(() {
                             userlist = help1[i];
                           });
@@ -93,7 +94,7 @@ class _HistoryUserState extends State<HistoryUserWidget> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.directions_car,
+                                    const Icon(Icons.directions_car,
                                         color: Colors.black, size: 30),
                                     Text(' ' + help1[i].vehicle.id),
                                   ],
@@ -107,21 +108,18 @@ class _HistoryUserState extends State<HistoryUserWidget> {
                                     children: [
                                       Row(
                                         children: [
-                                          Icon(Icons.calendar_month,
+                                          const Icon(Icons.calendar_month,
                                               color: Colors.black, size: 15),
-                                          Text(' ' +
-                                              DateFormat('dd-MM-yyyy')
-                                                  .format(help1[i].vehicle.time)
-                                                  .toString()),
-                                          SizedBox(width: 10),
-                                          Icon(Icons.timer,
+                                          Text(' ${DateFormat('dd-MM-yyyy')
+                                                  .format(help1[i].vehicle.time)}'),
+                                          const SizedBox(width: 10),
+                                          const Icon(Icons.timer,
                                               color: Colors.black, size: 15),
-                                          Text(' ' +
+                                          Text('${' ' +
                                               help1[i]
                                                   .vehicle
                                                   .tacc
-                                                  .toStringAsFixed(3) +
-                                              ' s'),
+                                                  .toStringAsFixed(3)} s'),
                                         ],
                                       ),
                                     ],

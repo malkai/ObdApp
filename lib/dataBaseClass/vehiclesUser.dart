@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-import 'package:latlong2/latlong.dart';
 
 part 'vehiclesUser.g.dart';
 
@@ -29,50 +28,43 @@ class Vin {
   @HiveField(3)
   List taccarr;
 
-  //distance_harv
 
-  @HiveField(4)
-  List kmarrh;
-  @HiveField(5)
-  double kmacch;
-  @HiveField(6)
-  List kmaccarrh;
 
   //distance_eucle
 
-  @HiveField(7)
+  @HiveField(4)
   List kmarre;
-  @HiveField(8)
+  @HiveField(5)
   double kmacce;
-  @HiveField(9)
+  @HiveField(6)
   List kmaccarre;
 
   //distance_vs
 
-  @HiveField(10)
+  @HiveField(7)
   List kmarrv;
-  @HiveField(11)
+  @HiveField(8)
   double kmaccv;
-  @HiveField(12)
+  @HiveField(9)
   List kmaccarrv;
 
   //Kalmanfilter AND savitzky_golay
 
-  @HiveField(13)
+  @HiveField(10)
   List farrk;
 
-  @HiveField(14)
+  @HiveField(11)
   List fuelkf;
 
   //fuelsf: auxf[1],
 
-  @HiveField(15)
+  @HiveField(12)
   double percentdata;
 
-  @HiveField(16)
+  @HiveField(13)
   DateTime time = DateTime.now();
 
-  @HiveField(17)
+  @HiveField(14)
   List points = [];
 
   Vin({
@@ -80,9 +72,6 @@ class Vin {
     required this.tarr,
     required this.tacc,
     required this.taccarr,
-    required this.kmarrh,
-    required this.kmacch,
-    required this.kmaccarrh,
     required this.kmarre,
     required this.kmacce,
     required this.kmaccarre,

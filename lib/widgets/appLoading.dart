@@ -4,15 +4,13 @@ import '../autoroute/autoroute.gr.dart';
 import '../dataBaseClass/obdRawData.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import '../dataBaseClass/vehiclesUser.dart';
-import '../functions/internalDatabase.dart';
+import '../functions/InternalDatabase.dart';
 
 class AppLoading extends StatefulWidget {
   final String text;
-  AppLoading({Key? key, this.text = ''}) : super(key: key);
+  const AppLoading({Key? key, this.text = ''}) : super(key: key);
 
   @override
   State<AppLoading> createState() => _AppLoadingState();
@@ -57,16 +55,13 @@ class _AppLoadingState extends State<AppLoading> {
   }
     */
 
-    if (!firstime) {
-      handledata();
-      setState(() {});
-      context.router.replace(Initialrouter());
-    } else {
+    if (firstime) {
       await bancoInterno.init();
-      handledata();
-      setState(() {});
-      context.router.replace(Initialrouter());
-    }
+    } 
+
+    await handledata();
+    setState(() {});
+    context.router.replace(Initialrouter());
     //
   }
 
@@ -75,7 +70,7 @@ class _AppLoadingState extends State<AppLoading> {
 
     var process = obdData.values
         .where((element) => element.uservehicle.userdata.processada == false);
-
+    print(process);
     if (process.isNotEmpty) {
       final diretorioUsuario =
           await path_prov.getApplicationDocumentsDirectory();
@@ -84,7 +79,8 @@ class _AppLoadingState extends State<AppLoading> {
       Map map = {
         "data": diretorioUsuario,
       };
-      bancoInterno.getDataOff(map);
+     
+      bancoInterno.getDataOff();
     }
   }
 
@@ -95,16 +91,7 @@ class _AppLoadingState extends State<AppLoading> {
     return help.length;
   }
 
-  void sendData(var path) async {
-    //var processados
-    var bancoInterno = InternalDatabase();
-    ReceivePort receivePort = ReceivePort();
-    Map map = {
-      "sendPort": receivePort.sendPort,
-      "data": path,
-    };
-    await Isolate.spawn(bancoInterno.getDataOff, map);
-  }
+
 
   @override
   void initState() {

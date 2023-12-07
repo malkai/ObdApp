@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:haversine_distance/haversine_distance.dart';
@@ -6,9 +5,6 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../dataBaseClass/obdRawData.dart';
 import '../dataBaseClass/vehiclesUser.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:path_provider/path_provider.dart' as path_prov;
-import '../functions/repository.dart';
 
 import '../dataBaseClass/confSimu.dart';
 import 'math.dart';
@@ -124,20 +120,11 @@ class InternalDatabase {
     return af1;
   }
 
-  void getDataOff(Map map) async {
-    var sp = map['data'];
+  void getDataOff() async {
+   
 
-    Hive.registerAdapter(UserdataAdapter());
-    Hive.registerAdapter(UserVehicleRawAdapter());
-    Hive.registerAdapter(UserDataProcessAdapter());
-    Hive.registerAdapter(UserAccAdapter());
-    Hive.registerAdapter(PositionClassAdapter());
-    Hive.registerAdapter(ObdRawDataAdapter());
-    Hive.registerAdapter(ObdDataAdapter());
-    Hive.registerAdapter(UserVehiclesAdapter());
-    Hive.registerAdapter(VinAdapter());
-
-    Box obdData = await Hive.openBox<Userdata>('obdData', path: sp);
+    Box obdData = await Hive.openBox<Userdata>('obdData');
+    Box teste2 = await Hive.openBox<UserVehicles>('userdata');
 
     var processados = obdData.values
         .where((element) => element.uservehicle.userdata.processada == false);
@@ -160,9 +147,6 @@ class InternalDatabase {
     List tarr = [0.0];
     List taccarr = [0.0];
 
-    double kmacch = 0;
-    List kmarrh = [0.0];
-    List kmaccarrh = [0.0];
 
     double kmacce = 0;
     List kmarre = [0.0];
@@ -177,11 +161,13 @@ class InternalDatabase {
     List points = [];
 
     double lat1 = 0, lat2 = 0, long1 = 0, long2 = 0;
-    final haversineDistance = HaversineDistance();
+    
     var start = Location(0, 0);
     int i = 0;
     int p = 0;
+  
     for (Userdata element in order) {
+   
       p += ValidInfo(element);
 
       if (vin1 == '') {
@@ -210,14 +196,6 @@ class InternalDatabase {
           tarr.add(deltt.toDouble());
           taccarr.add(tacc.toDouble());
 
-          //math haversine
-          //var deltkmha = haversineDistance.haversine(start, end, Unit.KM);
-
-          //kmacch += deltkmha.toDouble();
-          //kmarrh.add(deltkmha.toDouble());
-          //kmaccarrh.add(kmacch.toDouble());
-
-          //math euclidean
           int R = 6371;
           var x1 = R * cos(start.latitude) * cos(start.longitude);
           var y1 = R * cos(start.latitude) * sin(start.longitude);
@@ -243,10 +221,11 @@ class InternalDatabase {
                     .response) *
                 (deltt / 3600);
           } catch (e) {
-            deltkmobd = -1.0;
+            deltkmobd = 0.0;
           }
           kmarrv.add(deltkmobd.toDouble());
-
+          kmaccv =kmaccv + deltkmobd;
+          kmaccarrv.add(kmaccv);
           try {
             double fuelhelp = double.parse(element.uservehicle.userdata.userdata
                 .firstWhere((element) => element.pid == '01 2F')
@@ -263,35 +242,19 @@ class InternalDatabase {
           start = Location(lat1, long1);
         }
       }
-
       if ((vin1 != element.uservehicle.vin || element == order.last) ||
           time2.difference(time1).inSeconds > 600) {
         if (kmarrv.length > 1 && farrk.length > 1) {
           List linear = insertEventInstance.regressionLinear1(taccarr, kmarrv);
 
-          //kmarrv = linear[0];
-          //kmaccv = linear[1];
-          //kmaccarrv = linear[2];
-
-          //linear = insertEventInstance.regressionLinear1(taccarr, farrk);
-          //farrk = linear[0];
-
+    
           List auxf = insertEventInstance.kalmanfilter(farrk);
 
-          /*
-          List fuelregressionk =
-              insertEventInstance.regressionLinear2(taccarr, auxf[0]);
-          List fuelregressions =
-              insertEventInstance.regressionLinear2(taccarr, auxf[1]);
-          */
           var b = Vin(
               id: vin1,
               tarr: tarr,
               tacc: tacc,
               taccarr: taccarr,
-              kmarrh: kmarrh,
-              kmacch: kmacch,
-              kmaccarrh: kmaccarrh,
               kmarre: kmarre,
               kmacce: kmacce,
               kmaccarre: kmaccarre,
@@ -299,13 +262,13 @@ class InternalDatabase {
               kmaccv: kmaccv,
               kmaccarrv: kmaccarrv,
               farrk: farrk,
-              fuelkf: auxf[0],
+              fuelkf: auxf,
               points: points,
               percentdata: p / order.length * 100);
 
           var userdataride = UserVehicles(user: element.name, vehicle: b);
 
-          Box teste2 = await Hive.openBox<UserVehicles>('userdata', path: sp);
+          
 
           await teste2.add(userdataride).then((value) {
             p = 0;
@@ -316,12 +279,6 @@ class InternalDatabase {
             tacc = 0;
             taccarr.clear();
             taccarr.add(0.0);
-
-            kmarrh.clear();
-            kmarrh.add(0.0);
-            kmacch = 0;
-            kmaccarrh.clear();
-            kmaccarrh.add(0.0);
             kmarre.clear();
             kmarre.add(0.0);
             kmacce = 0;
@@ -337,12 +294,16 @@ class InternalDatabase {
             lat1 = element.uservehicle.userdata.pos.lat;
             long1 = element.uservehicle.userdata.pos.long;
           });
-          print('foi');
+        
         }
+       
       }
       order[i].uservehicle.userdata.processada = true;
       obdData.putAt(i, order[i]);
       i++;
     }
+  obdData.close();
+  teste2.close();
   }
+ 
 }

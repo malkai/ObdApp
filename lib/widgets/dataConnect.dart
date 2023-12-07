@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -16,12 +15,10 @@ import '../widgets/textWidget.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import '../dataBaseClass/obdRawData.dart';
-import '../functions/firebaseOptions.dart';
-import '../functions/internalDatabase.dart';
 import '../functions/security.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
-
+import '../functions/InternalDatabase.dart';
 class Data_Connect extends StatefulWidget {
   List<LatLng>? points;
 
@@ -67,7 +64,7 @@ class _ConnectState extends State<Data_Connect> {
 
   var bancoInterno = InternalDatabase();
 
-  static final LocationSettings _locationSettings = const LocationSettings(
+  static const LocationSettings _locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
     distanceFilter: 0,
   );
@@ -158,14 +155,14 @@ class _ConnectState extends State<Data_Connect> {
   void simuobdtime() {
     int i = 0;
     Timer.periodic(
-      Duration(milliseconds: 2500),
+      const Duration(milliseconds: 2500),
       (timer) async {
         _timer = timer;
         print(i);
 
         if (widget.statewidget == true) {
-          Random random = new Random();
-          List<ObdRawData> _responses1 = [];
+          Random random = Random();
+          List<ObdRawData> responses1 = [];
           ObdData help2 = ObdData(
               unit: "g/s",
               title: "fluxo de massa de ar (MAF)",
@@ -174,7 +171,7 @@ class _ConnectState extends State<Data_Connect> {
                       confdata.mafmin.toInt())
                   .toString());
           ObdRawData help1 = ObdRawData(pid: '01 10', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
 
           help2 = ObdData(
               unit: "Km/h",
@@ -183,7 +180,7 @@ class _ConnectState extends State<Data_Connect> {
                       confdata.velomin)
                   .toString());
           help1 = ObdRawData(pid: '01 0D', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
 
           help2 = ObdData(
               unit: "kPa",
@@ -193,7 +190,7 @@ class _ConnectState extends State<Data_Connect> {
                       confdata.pressmin.toInt())
                   .toString());
           help1 = ObdRawData(pid: '01 0B', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
 
           help2 = ObdData(
               unit: "\u00b0C",
@@ -203,7 +200,7 @@ class _ConnectState extends State<Data_Connect> {
                       confdata.tempaemin.toInt())
                   .toString());
           help1 = ObdRawData(pid: '01 0F', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
 
           help2 = ObdData(
               unit: "\u00b0C",
@@ -213,7 +210,7 @@ class _ConnectState extends State<Data_Connect> {
                       confdata.templamin.toInt())
                   .toString());
           help1 = ObdRawData(pid: '01 0F', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
 
           vin = ObdData(unit: "", title: "VIN", response: confdata.vin);
           //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
@@ -227,7 +224,7 @@ class _ConnectState extends State<Data_Connect> {
                       confdata.pressmin)
                   .toString());
           help1 = ObdRawData(pid: '01 2F', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
 
           help2 = ObdData(
               unit: "RPM",
@@ -237,9 +234,9 @@ class _ConnectState extends State<Data_Connect> {
                           confdata.rpmmin)
                       .toString());
           help1 = ObdRawData(pid: '01 0C', obddata: help2);
-          _responses1.add(help1);
+          responses1.add(help1);
           setState(() {
-            _responses = _responses1;
+            _responses = responses1;
           });
 
           String? uniqueid;
@@ -280,7 +277,7 @@ class _ConnectState extends State<Data_Connect> {
 
           UserDataProcess save = UserDataProcess(
               processada: false,
-              isOnline: a,
+              isOnline: false,
               signature: '',
               userdata: _responses,
               acc: acc,
@@ -306,7 +303,7 @@ class _ConnectState extends State<Data_Connect> {
           i++;
 
           await Future.delayed(
-            Duration(milliseconds: 2500),
+            const Duration(milliseconds: 2500),
           );
         } else {
           timer.cancel();
@@ -317,7 +314,7 @@ class _ConnectState extends State<Data_Connect> {
 
   void sendrequestOBDData() {
     Timer.periodic(
-      Duration(milliseconds: 2500),
+      const Duration(milliseconds: 2500),
       (timer) async {
         _timer = timer;
         if (widget.obd2.connection?.isConnected != false &&
@@ -377,7 +374,7 @@ class _ConnectState extends State<Data_Connect> {
       widget.obd2.setOnDataReceived((command, response, requestCode) async {
         List resps = jsonDecode(response);
 
-        List<ObdRawData> _responses1 = [];
+        List<ObdRawData> responses1 = [];
         ObdData vin2 = ObdData(unit: '', title: '', response: '');
         print(resps);
         if (resps.isNotEmpty) {
@@ -394,12 +391,12 @@ class _ConnectState extends State<Data_Connect> {
                   response: reading['response']);
               ObdRawData help1 =
                   ObdRawData(pid: reading['PID'], obddata: help2);
-              _responses1.add(help1);
+              responses1.add(help1);
             }
           }
         }
         setState(() {
-          _responses = _responses1;
+          _responses = responses1;
         });
         String? uniqueid;
 
@@ -472,9 +469,9 @@ class _ConnectState extends State<Data_Connect> {
 
     //print(path_prov.getDownloadsDirectory());
     //print(path_prov.getLibraryDirectory());
-    File file = new File(
+    File file = File(
         diretorioUsuario.path + "/" + DateTime.now().toString() + '.json');
-    String terre = diretorioUsuario.path + "/" + DateTime.now().toString();
+    String terre = "${diretorioUsuario.path}/${DateTime.now()}";
     file.create();
     int ui = 0;
 
@@ -503,7 +500,7 @@ class _ConnectState extends State<Data_Connect> {
     super.initState();
     init();
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      if (event != null) _userAccelEvt = event;
+      _userAccelEvt = event;
     });
 
     _positionStream =
@@ -526,9 +523,9 @@ class _ConnectState extends State<Data_Connect> {
 
     //print(path_prov.getDownloadsDirectory());
     //print(path_prov.getLibraryDirectory());
-    File file = new File(
+    File file = File(
         diretorioUsuario.path + "/" + DateTime.now().toString() + '.json');
-    String terre = diretorioUsuario.path + "/" + DateTime.now().toString();
+    String terre = "${diretorioUsuario.path}/${DateTime.now()}";
     file.create();
     const JsonEncoder encoder = JsonEncoder();
     final String jsonString = encoder.convert(data);
@@ -561,9 +558,7 @@ class _ConnectState extends State<Data_Connect> {
                               : _responses[i].obddata.title,
                           texto: _responses[i].obddata.unit == ''
                               ? 'PID $i'
-                              : _responses[i].obddata.response +
-                                  ' ' +
-                                  _responses[i].obddata.unit,
+                              : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
                         ),
                       ],
                     );

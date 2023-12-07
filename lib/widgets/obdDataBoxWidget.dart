@@ -6,7 +6,6 @@ import 'package:latlong2/latlong.dart';
 import '../autoroute/autoroute.gr.dart';
 import 'dataConnect.dart';
 
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class ObdDataMap extends StatefulWidget {
   final ObdPlugin obd2;
@@ -59,7 +58,7 @@ class _ObdDataMapState extends State<ObdDataMap> {
 
                 //Apploadingrouter()
                 context.router.pop().then(
-                    (value) => context.router.replace(Apploadingrouter()));
+                    (value) => context.router.replace(const Apploadingrouter()));
 
                 //
               }),
@@ -79,9 +78,9 @@ class _ObdDataMapState extends State<ObdDataMap> {
                     });
                   },
                   child: Container(
-                    padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     height: heigh1,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10),

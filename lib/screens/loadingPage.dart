@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/AppLoading.dart';
+import '../widgets/appLoading.dart';
 
 class Loadingpage extends StatelessWidget {
   const Loadingpage({Key? key}) : super(key: key);
@@ -13,7 +13,7 @@ class Loadingpage extends StatelessWidget {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
+          const Text(
             'Loading Page',
             style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.w300),
           ),

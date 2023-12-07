@@ -3,11 +3,8 @@ import '../screens/loadingPage.dart';
 import '../screens/OBDdatacollect.dart';
 import '../screens/appMainPage.dart';
 import '../screens/configurePage.dart';
-import '../screens/loadingPage.dart';
 import '../screens/riderObdUserPage.dart';
 import '../screens/historyRiderUserPage.dart';
-import '../widgets/appLoading.dart';
-import '../widgets/obdDataBoxWidget.dart';
 
 @MaterialAutoRouter(
   replaceInRouteName: 'Page,Route',

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../dataBaseClass/vehiclesUser.dart';
-import '../widgets/roadMapUserWidget.dart';
 import 'package:latlong2/latlong.dart';
 import '../widgets/textWidget.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -43,15 +42,21 @@ class _ObdDataMapState extends State<HistoryRideUser> {
 
       lat.add(a);
     }
-    for (int i = 0; i < aux.vehicle.kmaccarrh.length - 1; i++) {
-      infokm.add(
-          kmData(aux.vehicle.kmaccarrh[i], aux.vehicle.taccarr[i].toString()));
+    for (int i = 0; i < aux.vehicle.kmaccarre.length - 1; i++) {
+
       infokm2.add(
           kmData(aux.vehicle.kmaccarre[i], aux.vehicle.taccarr[i].toString()));
-      infokm3.add(
-          kmData(aux.vehicle.kmaccarrv[i], aux.vehicle.taccarr[i].toString()));
+    
       infof.add(fuelData(
           aux.vehicle.farrk[i], aux.vehicle.fuelkf[i], aux.vehicle.taccarr[i]));
+    }
+    print(aux.vehicle.kmaccarrv.length );
+    for (int i = 0; i < aux.vehicle.kmaccarrv.length - 1; i++) {
+
+      infokm3.add(
+          kmData(aux.vehicle.kmaccarrv[i], aux.vehicle.taccarr[i].toString()));
+        
+      
     }
     setState(
       () {
@@ -94,7 +99,7 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                     maxZoom: 19,
                     urlTemplate:
                         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
+                    subdomains: const ['a', 'b', 'c'],
                     userAgentPackageName: 'dev.fleaflet.flutter_map.example',
                   ),
                   PolylineLayer(polylineCulling: false, polylines: [
@@ -108,7 +113,7 @@ class _ObdDataMapState extends State<HistoryRideUser> {
               ),
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
               child: FloatingActionButton(
                   child: const Icon(Icons.arrow_back),
                   onPressed: () {
@@ -132,9 +137,9 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                       });
                     },
                     child: Container(
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                       height: heigh1,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(10),
@@ -144,7 +149,7 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                           children: [
                             Row(
                               children: [
-                                Container(
+                                SizedBox(
                                   height: 100,
                                   width: 100,
                                   child:
@@ -170,33 +175,11 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                 Textdata(
                                   tipo: 'Tempo ',
                                   texto:
-                                      widget.userlist.vehicle.tacc.toString() +
-                                          ' s',
+                                      '${widget.userlist.vehicle.tacc} s',
                                 ),
                               ],
                             ),
-                            Column(
-                              children: [
-                                Textdata(
-                                  tipo: 'Distância total por Harversine ',
-                                  texto: widget.userlist.vehicle.kmacch
-                                          .toStringAsFixed(3) +
-                                      ' km',
-                                ),
-                                SfCartesianChart(
-                                    // Initialize category axis
-                                    primaryXAxis: CategoryAxis(),
-                                    series: <CartesianSeries>[
-                                      // Initialize line series
-                                      LineSeries<kmData, String>(
-                                          dataSource: infokm,
-                                          xValueMapper: (kmData data, _) =>
-                                              data.time.toString(),
-                                          yValueMapper: (kmData data, _) =>
-                                              data.acckm),
-                                    ])
-                              ],
-                            ),
+                        
                             Column(
                               children: [
                                 Textdata(
@@ -210,7 +193,6 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                   primaryXAxis: CategoryAxis(),
                                   series: <CartesianSeries>[
                                     // Initialize line series
-
                                     LineSeries<kmData, String>(
                                         dataSource: infokm2,
                                         xValueMapper: (kmData data, _) =>
@@ -248,7 +230,7 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                             ),
                             Column(
                               children: [
-                                Textdata(
+                                const Textdata(
                                   tipo:
                                       'consumo de combustivel pelo filtro de Kalman ',
                                 ),
@@ -257,7 +239,6 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                   primaryXAxis: CategoryAxis(),
                                   series: <CartesianSeries>[
                                     // Initialize line series
-
                                     LineSeries<fuelData, String>(
                                         dataSource: infof,
                                         xValueMapper: (fuelData data, _) =>
@@ -274,34 +255,7 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                 ),
                               ],
                             ),
-                            Column(
-                              children: [
-                                Textdata(
-                                  tipo:
-                                      'consumo de combustivel pelo filtro de savitzky ',
-                                ),
-                                SfCartesianChart(
-                                  // Initialize category axis
-                                  primaryXAxis: CategoryAxis(),
-                                  series: <CartesianSeries>[
-                                    // Initialize line series
-
-                                    LineSeries<fuelData, String>(
-                                        dataSource: infof2,
-                                        xValueMapper: (fuelData data, _) =>
-                                            data.time.toString(),
-                                        yValueMapper: (fuelData data, _) =>
-                                            data.fuel),
-                                    LineSeries<fuelData, String>(
-                                        dataSource: infof,
-                                        xValueMapper: (fuelData data, _) =>
-                                            data.time.toString(),
-                                        yValueMapper: (fuelData data, _) =>
-                                            data.fuelf),
-                                  ],
-                                ),
-                              ],
-                            ),
+                           
                             Textdata(
                               tipo: 'Data ',
                               texto: widget.userlist.vehicle.time.toString(),

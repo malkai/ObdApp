@@ -7,10 +7,9 @@ import '../functions/obdPlugin.dart';
 
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-import 'package:auto_route/auto_route.dart';
 
 class InitBluetooth extends StatefulWidget {
-  InitBluetooth({
+  const InitBluetooth({
     Key? key,
   }) : super(key: key);
 
@@ -115,7 +114,7 @@ class _FloatState extends State<InitBluetooth> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   child: FloatingActionButton(
                     child: const Icon(Icons.bluetooth),
                     onPressed: () async {
