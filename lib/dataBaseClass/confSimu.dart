@@ -119,6 +119,15 @@ class Confdata {
   @HiveField(16)
   bool on;
 
+  @HiveField(17)
+  List<getobddata> responseobddata;
+
+   @HiveField(18)
+  String name;
+
+  @HiveField(19)
+  String timereqobd;
+
   Confdata({
     required this.rpmmax,
     required this.rpmmin,
@@ -136,5 +145,43 @@ class Confdata {
     required this.velomin,
     required this.vin,
     required this.on,
+    required this.responseobddata,
+    required this.name,
+    required this.timereqobd,
+  });
+}
+
+@HiveType(typeId: 10)
+class getobddata {
+  //750 - 10.000
+  @HiveField(0)
+  String pid;
+  @HiveField(1)
+  String length;
+
+  //0 - 120
+  @HiveField(2)
+  String title;
+  @HiveField(3)
+  String unit;
+
+  //90 - 104.4
+  @HiveField(4)
+  String description;
+  @HiveField(5)
+  String status;
+
+  //14.7 - 101
+ 
+
+
+  getobddata({
+    required this.pid,
+    required this.length,
+    required this.title,
+    required this.unit,
+    required this.description,
+    required this.status,
+    
   });
 }

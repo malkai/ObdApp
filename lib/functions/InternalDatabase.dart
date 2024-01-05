@@ -49,6 +49,9 @@ class InternalDatabase {
         mafmax: 1000,
         percentmin: 50,
         percentmax: 70,
+        responseobddata: [],
+        name: 'Appteste',
+        timereqobd: '1',
         on: false);
 
     var confapp = await Hive.openBox<Confdata>('conf');
@@ -59,39 +62,29 @@ class InternalDatabase {
   bool isON() {
     if (Hive.isAdapterRegistered(2)) {
       return true;
-      //<Userdata>('obdData')
     } else {
       return false;
     }
-    /*
-    try {} catch (E) {
-      print(E);
-    }
-    return false;*/
+   
   }
 
   bool teste() {
-    print(!Hive.isAdapterRegistered(2));
     if (!Hive.isAdapterRegistered(2)) {
       return true;
-      //<Userdata>('obdData')
     } else {
       return false;
     }
-    /*
-    try {} catch (E) {
-      print(E);
-    }
-    return false;*/
+    
   }
 
   void insertObdData(var data) async {
     var obdData = await Hive.openBox<Userdata>('obdData');
-    obdData.add(data);
+    if(obdData.containsKey(data)==false){
+    obdData.add(data);}
     obdData.close();
   }
 
-  int ValidInfo(Userdata element) {
+  int validInfo(Userdata element) {
     try {
       var vin = element.uservehicle.vin;
       var time = element.uservehicle.userdata.time;
@@ -113,14 +106,8 @@ class InternalDatabase {
     return 0;
   }
 
-  List filterapply(List farrk) {
-    List af1 = insertEventInstance.kalmanfilter(farrk);
-    //List af2 = insertEventInstance.apply_savitzky(farrk);
 
-    return af1;
-  }
-
-  void getDataOff() async {
+  void processingdataOBD() async {
    
 
     Box obdData = await Hive.openBox<Userdata>('obdData');
@@ -168,7 +155,7 @@ class InternalDatabase {
   
     for (Userdata element in order) {
    
-      p += ValidInfo(element);
+      p += validInfo(element);
 
       if (vin1 == '') {
         vin1 = element.uservehicle.vin;
@@ -188,14 +175,18 @@ class InternalDatabase {
 
       points.add([lat2, long2]);
       if (time2.difference(time1).inSeconds < 120) {
-        //math timw
+      
         if (time2 != time1) {
+
+          //math total time
           var deltt = (time2.difference(time1).inSeconds);
 
           tacc += deltt.toDouble();
           tarr.add(deltt.toDouble());
           taccarr.add(tacc.toDouble());
 
+
+          //math Eucledean
           int R = 6371;
           var x1 = R * cos(start.latitude) * cos(start.longitude);
           var y1 = R * cos(start.latitude) * sin(start.longitude);
@@ -212,8 +203,9 @@ class InternalDatabase {
           kmarre.add(deltkmeu.toDouble());
           kmaccarre.add(kmacce.toDouble());
           var deltkmobd = 0.0;
-          //math obd
-
+         
+         
+          //math VS obd
           try {
             deltkmobd = double.parse(element.uservehicle.userdata.userdata
                     .firstWhere((element) => element.pid == '01 0D')
@@ -269,31 +261,31 @@ class InternalDatabase {
           var userdataride = UserVehicles(user: element.name, vehicle: b);
 
           
-
-          await teste2.add(userdataride).then((value) {
-            p = 0;
-
-            vin1 = '';
-            tarr.clear();
-            tarr.add(0.0);
-            tacc = 0;
-            taccarr.clear();
-            taccarr.add(0.0);
-            kmarre.clear();
-            kmarre.add(0.0);
-            kmacce = 0;
-            kmaccarre.clear();
-            kmaccarre.add(0.0);
-            kmarrv.clear();
-            kmarrv.add(0.0);
-            kmaccv = 0;
-            kmaccarrv.clear();
-            kmaccarrv.add(0.0);
-            farrk.clear();
-            farrk.add(0.0);
-            lat1 = element.uservehicle.userdata.pos.lat;
-            long1 = element.uservehicle.userdata.pos.long;
-          });
+          if(teste2.containsKey(userdataride)==false){
+            await teste2.add(userdataride).then((value) {
+              p = 0;
+              vin1 = '';
+              tarr.clear();
+              tarr.add(0.0);
+              tacc = 0;
+              taccarr.clear();
+              taccarr.add(0.0);
+              kmarre.clear();
+              kmarre.add(0.0);
+              kmacce = 0;
+              kmaccarre.clear();
+              kmaccarre.add(0.0);
+              kmarrv.clear();
+              kmarrv.add(0.0);
+              kmaccv = 0;
+              kmaccarrv.clear();
+              kmaccarrv.add(0.0);
+              farrk.clear();
+              farrk.add(0.0);
+              lat1 = element.uservehicle.userdata.pos.lat;
+              long1 = element.uservehicle.userdata.pos.long;
+            });
+          }
         
         }
        

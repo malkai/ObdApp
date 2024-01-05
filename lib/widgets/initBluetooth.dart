@@ -114,8 +114,9 @@ class _FloatState extends State<InitBluetooth> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(150, 0, 150, 0),
                   child: FloatingActionButton(
+                    backgroundColor: Color.fromARGB(255, 89, 69, 243),
                     child: const Icon(Icons.bluetooth),
                     onPressed: () async {
                       init();

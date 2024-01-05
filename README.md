@@ -11,8 +11,6 @@ Figura 1: Ações do usuário no sistema Mobile
 
 ![condutor](condutor.png)
 
-
-
 A Figura 2 representa a interação do condutor com o aplicativo. O processo começa quando o condutor solicita que o aplicativo inicie o experimento. Neste momento, o aplicativo  inicia uma solicitação de conexão Bluetooth com o scanner OBD. O scanner, por sua vez, solicita as informações à interface OBD do veículo, que envia esses dados ao aplicativo através do scanner
 
 Figura 2: Ações do usuário no sistema aplicativo mobile

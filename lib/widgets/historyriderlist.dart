@@ -15,13 +15,12 @@ class _HistoryUserState extends State<HistoryUserWidget> {
   List<dynamic> help1 = [];
   var userlist;
   bool bb = true;
+  late Box confapp;
 
   Future<List> aux() async {
     var bb = await path_prov.getApplicationDocumentsDirectory();
     Box teste = await Hive.openBox<UserVehicles>('userdata', path: bb.path);
-    print('testeuserdata');
-    print(teste);
-
+   
     List help = teste.values.toList();
     return help;
   }
@@ -32,6 +31,21 @@ class _HistoryUserState extends State<HistoryUserWidget> {
     entry = null;
   }
 
+
+  void deletePath(var data) async {
+     var bb = await path_prov.getApplicationDocumentsDirectory();
+     Box teste = await Hive.openBox<UserVehicles>('userdata', path: bb.path);
+     print(data);
+     teste.deleteAt(data);
+     teste.close();
+   aux().then(
+      (value) => setState(
+        () {
+          help1 = value;
+        },
+      ),
+    );
+  }
   void showOverlay() {
     try {
       entry = OverlayEntry(
@@ -124,7 +138,27 @@ class _HistoryUserState extends State<HistoryUserWidget> {
                                       ),
                                     ],
                                   ),
-                                )
+                                ),
+                                  Container(
+                                        padding:
+                                          const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                    child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                      child: const Text(
+                                        'Deletar',
+                                        style: TextStyle(fontSize: 20.0),
+                                      ),
+                                      onPressed: () {
+                                       deletePath(i);
+                                       setState(() {});
+                                      },
+                                      
+                                    ),
+                                    ],
+                                                                    ),
+                                  ),
                               ],
                             ),
                           ),

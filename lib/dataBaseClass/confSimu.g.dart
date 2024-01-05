@@ -33,13 +33,16 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
       velomin: fields[2] as int,
       vin: fields[8] as String,
       on: fields[16] as bool,
+      responseobddata: (fields[17] as List).cast<getobddata>(),
+      name: fields[18] as String,
+      timereqobd: fields[19] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Confdata obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.rpmmin)
       ..writeByte(1)
@@ -71,7 +74,13 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
       ..writeByte(15)
       ..write(obj.percentmax)
       ..writeByte(16)
-      ..write(obj.on);
+      ..write(obj.on)
+      ..writeByte(17)
+      ..write(obj.responseobddata)
+      ..writeByte(18)
+      ..write(obj.name)
+      ..writeByte(19)
+      ..write(obj.timereqobd);
   }
 
   @override
@@ -81,6 +90,55 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ConfdataAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class getobddataAdapter extends TypeAdapter<getobddata> {
+  @override
+  final int typeId = 10;
+
+  @override
+  getobddata read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return getobddata(
+      pid: fields[0] as String,
+      length: fields[1] as String,
+      title: fields[2] as String,
+      unit: fields[3] as String,
+      description: fields[4] as String,
+      status: fields[5] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, getobddata obj) {
+    writer
+      ..writeByte(6)
+      ..writeByte(0)
+      ..write(obj.pid)
+      ..writeByte(1)
+      ..write(obj.length)
+      ..writeByte(2)
+      ..write(obj.title)
+      ..writeByte(3)
+      ..write(obj.unit)
+      ..writeByte(4)
+      ..write(obj.description)
+      ..writeByte(5)
+      ..write(obj.status);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is getobddataAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

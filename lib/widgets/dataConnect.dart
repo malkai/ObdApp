@@ -158,9 +158,17 @@ class _ConnectState extends State<Data_Connect> {
       const Duration(milliseconds: 2500),
       (timer) async {
         _timer = timer;
-        print(i);
-
         if (widget.statewidget == true) {
+          if (_position != null) {
+            PositionClass pc = PositionClass(lat: 0.0, long: 0.0);
+            GeoPoint actualPosition =
+                GeoPoint(_position!.latitude, _position!.longitude);
+            pc.lat = actualPosition.latitude;
+            pc.long = actualPosition.longitude;
+            LatLng aux =
+                LatLng(actualPosition.latitude, actualPosition.longitude);
+
+            widget.points?.add(aux);
           Random random = Random();
           List<ObdRawData> responses1 = [];
           ObdData help2 = ObdData(
@@ -249,7 +257,7 @@ class _ConnectState extends State<Data_Connect> {
             uniqueid = androidDeviceInfo.id;
           }
           UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
-          PositionClass pc = PositionClass(lat: 0.0, long: 0.0);
+          
 
           if (_userAccelEvt != null) {
             Map accel = {};
@@ -263,16 +271,9 @@ class _ConnectState extends State<Data_Connect> {
             acc.unit = accel['unit'];
           }
 
-          if (_position != null) {
-            GeoPoint actualPosition =
-                GeoPoint(_position!.latitude, _position!.longitude);
-            pc.lat = actualPosition.latitude;
-            pc.long = actualPosition.longitude;
-            LatLng aux =
-                LatLng(actualPosition.latitude, actualPosition.longitude);
-
-            widget.points?.add(aux);
-          }
+          
+        
+         
           bool a = await checkUserConnection();
 
           UserDataProcess save = UserDataProcess(
@@ -308,7 +309,8 @@ class _ConnectState extends State<Data_Connect> {
         } else {
           timer.cancel();
         }
-      },
+        }
+      }
     );
   }
 
@@ -372,8 +374,32 @@ class _ConnectState extends State<Data_Connect> {
   void obdinfo() async {
     if (!(await widget.obd2.isListenToDataInitialed)) {
       widget.obd2.setOnDataReceived((command, response, requestCode) async {
-        List resps = jsonDecode(response);
+      if (_position != null) {
+         PositionClass pc = PositionClass(lat: 0.0, long: 0.0);
+          PositionClass pc2 = PositionClass(lat: 0.0, long: 0.0);
+         GeoPoint actualPosition =
+              GeoPoint(_position!.latitude, _position!.longitude);
+          pc2 = pc;
+          pc.lat = actualPosition.latitude;
+          pc.long = actualPosition.longitude;
+          int R = 6371;
+          var x1 = R * cos(pc2.lat) * cos(pc2.long );
+          var y1 = R * cos(pc2.lat) * sin(pc2.long );
+          var z1 = R * sin(pc2.lat);
 
+          var x2 = R * cos( pc.lat) * cos(pc.long );
+          var y2 = R * cos( pc.lat) * sin(pc.long );
+          var z2 = R * sin( pc.lat);
+
+          var deltkmeu =
+              sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) + pow(z2 - z1, 2));
+          if(deltkmeu/1000<60)  {  
+          LatLng aux =
+              LatLng(actualPosition.latitude, actualPosition.longitude);
+
+          widget.points?.add(aux);
+       
+        List resps = jsonDecode(response);
         List<ObdRawData> responses1 = [];
         ObdData vin2 = ObdData(unit: '', title: '', response: '');
         print(resps);
@@ -391,6 +417,7 @@ class _ConnectState extends State<Data_Connect> {
                   response: reading['response']);
               ObdRawData help1 =
                   ObdRawData(pid: reading['PID'], obddata: help2);
+              print(reading['title']);  
               responses1.add(help1);
             }
           }
@@ -408,8 +435,7 @@ class _ConnectState extends State<Data_Connect> {
           uniqueid = androidDeviceInfo.id;
         }
         UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
-        PositionClass pc = PositionClass(lat: 0.0, long: 0.0);
-
+       
         if (_userAccelEvt != null) {
           Map accel = {};
           accel['x'] = _userAccelEvt?.x.toString();
@@ -422,16 +448,7 @@ class _ConnectState extends State<Data_Connect> {
           acc.unit = accel['unit'];
         }
 
-        if (_position != null) {
-          GeoPoint actualPosition =
-              GeoPoint(_position!.latitude, _position!.longitude);
-          pc.lat = actualPosition.latitude;
-          pc.long = actualPosition.longitude;
-          LatLng aux =
-              LatLng(actualPosition.latitude, actualPosition.longitude);
-
-          widget.points?.add(aux);
-        }
+       
         bool a = await checkUserConnection();
 
         UserDataProcess save = UserDataProcess(
@@ -444,8 +461,11 @@ class _ConnectState extends State<Data_Connect> {
             time: DateTime.now());
         var signature = await sign(save).then((signature) => signature);
         save.signature = signature.toString();
-        UserVehicleRaw vehicledata =
-            UserVehicleRaw(userdata: save, vin: vin.response);
+            UserVehicleRaw vehicledata = UserVehicleRaw(userdata: save, vin: confdata.name);
+            if(vin.response!=''){
+              vehicledata =UserVehicleRaw(userdata: save, vin: vin.response);
+            }
+          
 
         Userdata tobesaved =
             Userdata(name: uniqueid!, uservehicle: vehicledata);
@@ -459,7 +479,7 @@ class _ConnectState extends State<Data_Connect> {
         } else {
           bancoInterno.insertObdData(tobesaved);
         }
-      });
+      } }});
       sendrequestOBDData();
     }
   }
