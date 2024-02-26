@@ -50,18 +50,21 @@ class _ObdDataMapState extends State<ObdDataMap> {
                     color: Colors.brown[50],
                   );
           }),
-          FloatingActionButton(
-              child: const Icon(Icons.arrow_back),
-              onPressed: () async {
-                changestate();
-                await widget.turnOBD_OFF();
-
-                //Apploadingrouter()
-                context.router.pop().then(
-                    (value) => context.router.replace(const Apploadingrouter()));
-
-                //
-              }),
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            child: FloatingActionButton(
+                child: const Icon(Icons.arrow_back),
+                onPressed: () async {
+                  changestate();
+                  await widget.turnOBD_OFF();
+            
+                  //Apploadingrouter()
+                  context.router.pop().then(
+                      (value) => context.router.replace(const Apploadingrouter()));
+            
+                  //
+                }),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.end,

@@ -120,22 +120,17 @@ class _HistoryUserState extends State<HistoryUserWidget> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.calendar_month,
-                                              color: Colors.black, size: 15),
-                                          Text(' ${DateFormat('dd-MM-yyyy')
-                                                  .format(help1[i].vehicle.time)}'),
-                                          const SizedBox(width: 10),
-                                          const Icon(Icons.timer,
-                                              color: Colors.black, size: 15),
-                                          Text('${' ' +
-                                              help1[i]
-                                                  .vehicle
-                                                  .tacc
-                                                  .toStringAsFixed(3)} s'),
-                                        ],
-                                      ),
+                                      const Icon(Icons.calendar_month,
+                                          color: Colors.black, size: 15),
+                                      Text(help1[i].vehicle.time.toString()),
+                                      const SizedBox(width: 10),
+                                      const Icon(Icons.timer,
+                                          color: Colors.black, size: 15),
+                                      Text('${' ' +
+                                          help1[i]
+                                              .vehicle
+                                              .tacc
+                                              .toStringAsFixed(3)} s'),
                                     ],
                                   ),
                                 ),
@@ -151,7 +146,32 @@ class _HistoryUserState extends State<HistoryUserWidget> {
                                         style: TextStyle(fontSize: 20.0),
                                       ),
                                       onPressed: () {
-                                       deletePath(i);
+                                       //deletePath(i);
+                                      showDialog(
+                                      //if set to true allow to close popup by tapping out of the popup
+                                    
+                                      context: context,
+                                      builder: (BuildContext context) => AlertDialog(
+                                      title: Text("Deseja deletar o arquivo"),
+                                      content: Text(help1[i].vehicle.id + '\n' + help1[i].vehicle.time.toString()),
+                                      actions: [
+                                      ElevatedButton(
+                                            child: Text("Yes"),
+                                          onPressed: () {
+                                            deletePath(i);
+                                            Navigator.pop(context);
+                                          },
+                                      ),
+                                      ElevatedButton(
+                                          child: Text("No"),
+                                            onPressed: () {
+                                                Navigator.pop(context);
+                                            },
+                                      )
+                                        ],
+                                      elevation: 24,
+                                      ),
+                                      );
                                        setState(() {});
                                       },
                                       

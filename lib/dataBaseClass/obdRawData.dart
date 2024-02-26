@@ -2,7 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 part 'obdRawData.g.dart';
 
 @HiveType(typeId: 2)
-class Userdata {
+class Userdata  extends HiveObject {
   @HiveField(0)
   String name;
   @HiveField(1)

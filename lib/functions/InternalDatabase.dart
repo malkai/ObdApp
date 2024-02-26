@@ -14,7 +14,8 @@ class InternalDatabase {
   var insertEventInstance = InternalMath();
   late Box confapp;
 
-  Future<void> init() async {
+  void init() async {
+    /*
     Hive.registerAdapter(UserdataAdapter());
     Hive.registerAdapter(UserVehicleRawAdapter());
     Hive.registerAdapter(UserDataProcessAdapter());
@@ -25,8 +26,8 @@ class InternalDatabase {
     Hive.registerAdapter(UserVehiclesAdapter());
     Hive.registerAdapter(ConfdataAdapter());
     Hive.registerAdapter(VinAdapter());
-
-    confapp = await Hive.openBox<Confdata>('conf');
+   */
+    confapp = await  Hive.openBox<Confdata>('conf');
     if (confapp.length <= 0) {
       newvalue();
     }
@@ -54,9 +55,9 @@ class InternalDatabase {
         timereqobd: '1',
         on: false);
 
-    var confapp = await Hive.openBox<Confdata>('conf');
+    var confapp = await  Hive.openBox<Confdata>('conf');
     await confapp.add(a);
-    await confapp.close();
+  
   }
 
   bool isON() {
@@ -68,20 +69,12 @@ class InternalDatabase {
    
   }
 
-  bool teste() {
-    if (!Hive.isAdapterRegistered(2)) {
-      return true;
-    } else {
-      return false;
-    }
-    
-  }
+  
 
   void insertObdData(var data) async {
     var obdData = await Hive.openBox<Userdata>('obdData');
     if(obdData.containsKey(data)==false){
     obdData.add(data);}
-    obdData.close();
   }
 
   int validInfo(Userdata element) {
@@ -107,12 +100,11 @@ class InternalDatabase {
   }
 
 
-  void processingdataOBD() async {
+  void processingdataOBD( var process, var keys ) async {
    
 
-    Box obdData = await Hive.openBox<Userdata>('obdData');
-    Box teste2 = await Hive.openBox<UserVehicles>('userdata');
-
+   /*
+    Box obdData = await Hive.openBox<Userdata>('obdData') ;
     var processados = obdData.values
         .where((element) => element.uservehicle.userdata.processada == false);
     var order = processados.toList()
@@ -124,7 +116,7 @@ class InternalDatabase {
         }
         return nameComp;
       });
-
+    */
     String vin1 = '';
 
     DateTime time1 = DateTime.parse('2020-01-02 03:04:05');
@@ -153,7 +145,7 @@ class InternalDatabase {
     int i = 0;
     int p = 0;
   
-    for (Userdata element in order) {
+    for (Userdata element in process) {
    
       p += validInfo(element);
 
@@ -166,6 +158,7 @@ class InternalDatabase {
 
         //LatLong.add([lat1, long1]);
       }
+      time1 = time2;
       time2 = DateTime.parse(element.uservehicle.userdata.time.toString());
 
       lat2 = element.uservehicle.userdata.pos.lat;
@@ -174,7 +167,7 @@ class InternalDatabase {
       var end = Location(lat2, long2);
 
       points.add([lat2, long2]);
-      if (time2.difference(time1).inSeconds < 120) {
+      if (time2.difference(time1).inSeconds < 1000) {
       
         if (time2 != time1) {
 
@@ -234,11 +227,9 @@ class InternalDatabase {
           start = Location(lat1, long1);
         }
       }
-      if ((vin1 != element.uservehicle.vin || element == order.last) ||
-          time2.difference(time1).inSeconds > 600) {
+      if (vin1 != element.uservehicle.vin || element == process.last) {
         if (kmarrv.length > 1 && farrk.length > 1) {
-          List linear = insertEventInstance.regressionLinear1(taccarr, kmarrv);
-
+          
     
           List auxf = insertEventInstance.kalmanfilter(farrk);
 
@@ -256,13 +247,13 @@ class InternalDatabase {
               farrk: farrk,
               fuelkf: auxf,
               points: points,
-              percentdata: p / order.length * 100);
+              percentdata: p / process.length * 100);
 
           var userdataride = UserVehicles(user: element.name, vehicle: b);
 
-          
+          Box teste2 =  await Hive.openBox<UserVehicles>('userdata') ;
           if(teste2.containsKey(userdataride)==false){
-            await teste2.add(userdataride).then((value) {
+             teste2.add(userdataride).then((value) {
               p = 0;
               vin1 = '';
               tarr.clear();
@@ -285,17 +276,36 @@ class InternalDatabase {
               lat1 = element.uservehicle.userdata.pos.lat;
               long1 = element.uservehicle.userdata.pos.long;
             });
+            await teste2.close();
           }
         
+         
         }
        
       }
-      order[i].uservehicle.userdata.processada = true;
-      obdData.putAt(i, order[i]);
-      i++;
+      //print(process[i].uservehicle.userdata.processada);
+      element.uservehicle.userdata.processada = true;
+      //print(order[i].uservehicle.);
+      Box obdData = await Hive.openBox<Userdata>('obdData');
+      //var ty = obdData.values.toList();
+      //int index = ty.indexWhere((item) => item == element);
+      //print(index);
+      
+    
+      
+      await obdData.putAt(element.key, element);
+      
+      if(i<=process.length-1)
+      {
+        i++;
+      }
     }
-  obdData.close();
-  teste2.close();
+   
+
+   
+  
+ 
   }
+  
  
 }

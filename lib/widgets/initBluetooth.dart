@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../autoroute/autoroute.gr.dart';
 import '../dataBaseClass/confSimu.dart';
 import '../functions/obdPlugin.dart';
@@ -24,6 +27,7 @@ class _FloatState extends State<InitBluetooth> {
 
   var obd2 = ObdPlugin();
   bool help = true;
+  
 
   final FlutterBluetoothSerial _bluetooth = FlutterBluetoothSerial.instance;
 
@@ -47,11 +51,15 @@ class _FloatState extends State<InitBluetooth> {
   void init() async {
     confapp = await Hive.openBox<Confdata>('conf');
     confdata = confapp.getAt(0);
+   
+
+     
   }
 
   @override
   void initState() {
     init();
+    
     super.initState();
   }
 
@@ -61,47 +69,51 @@ class _FloatState extends State<InitBluetooth> {
   }
 
   Future<void> showBluetoothList(
-      BuildContext context, ObdPlugin obd2plugin) async {
+    BuildContext context, ObdPlugin obd2plugin) async {
     List<BluetoothDevice> devices = await obd2plugin.getPairedDevices;
-
+   
     showBottomSheet(
         context: context,
-        builder: (BuildContext context) => Container(
-              padding: const EdgeInsets.only(top: 0),
-              width: double.infinity,
-              height: devices.length * 50,
-              child: ListView.builder(
-                itemCount: devices.length,
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    height: 50,
-                    child: TextButton(
-                      onPressed: () {
-                        obd2plugin.getConnection(devices[index], (connection) {
-                          try {
-                            change_flag();
-
-                            context.router.popAndPush(Obddtarouter(
-                                obd2: obd2,
-                                turnOBD_OFF: turnOBD_OFF,
-                                logic: help));
-                          } catch (e) {
-                            print(e);
-                          }
-                        }, (message) {
-                          print("error in connecting: $message");
-                        });
-
-                        //Navigator.pop(context, aux);
-                      },
-                      child: Center(
-                        child: Text(devices[index].name.toString()),
+        builder: (BuildContext context) => TapRegion(
+            onTapOutside: (tap) {
+               context.router.pop();
+          },
+          child:  Container(
+                padding: const EdgeInsets.only(top: 0),
+                width: double.infinity,
+                height: devices.length * 50,
+                child: ListView.builder(
+                  itemCount: devices.length,
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      height: 50,
+                      child: TextButton(
+                        onPressed: () {
+                          obd2plugin.getConnection(devices[index], (connection) {
+                            try {
+                              change_flag();
+                              context.router.popAndPush(Obddtarouter(
+                                  obd2: obd2,
+                                  turnOBD_OFF: turnOBD_OFF,
+                                  logic: help));
+                            } catch (e) {
+                              print(e);
+                            }
+                          }, (message) {
+                          });
+          
+                          //Navigator.pop(context, aux);
+                        },
+                        child: Center(
+                          child: Text(devices[index].name.toString()),
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ));
+                    );
+                  },
+                ),
+              )
+            
+        ));
   }
 
   @override
@@ -121,8 +133,6 @@ class _FloatState extends State<InitBluetooth> {
                     onPressed: () async {
                       init();
 
-                      List<BluetoothDevice> devices =
-                          await obd2.getPairedDevices;
                       if (confdata.on == true) {
                         context.router.push(Obddtarouter(
                             obd2: obd2, turnOBD_OFF: turnOBD_OFF, logic: help));
@@ -131,7 +141,9 @@ class _FloatState extends State<InitBluetooth> {
                           await obd2.enableBluetooth;
                         }
                         //_bluetooth.startDiscovery();
+                        
                         showBluetoothList(context, obd2);
+                       
                       }
                     },
                   ),

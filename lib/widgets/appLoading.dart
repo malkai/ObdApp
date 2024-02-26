@@ -1,5 +1,6 @@
 
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import '../autoroute/autoroute.gr.dart';
 import '../dataBaseClass/obdRawData.dart';
 import 'package:auto_route/auto_route.dart';
@@ -17,41 +18,27 @@ class AppLoading extends StatefulWidget {
 
 class _AppLoadingState extends State<AppLoading> {
   void init() async {
-    bool firstime;
 
     var bancoInterno = InternalDatabase();
-    firstime = bancoInterno.teste();
-
-    if (firstime) {
-      await bancoInterno.init();
-    } 
-
-    await handledata();
-    setState(() {});
+    bancoInterno.init(); 
+    await handledata().then((value) { 
     context.router.replace(Initialrouter());
+      });
+
+  
   
   }
 
   Future<void> handledata() async {
-    Box obdData = await Hive.openBox<Userdata>('obdData');
-
+    List<int> keys=[];
+    Box<Userdata> obdData = await Hive.openBox<Userdata>('obdData');
     var process = obdData.values
         .where((element) => element.uservehicle.userdata.processada == false);
-    print(process);
+    process.forEach((element) {keys.add(element.key);});
     if (process.isNotEmpty) {
-      
       var bancoInterno = InternalDatabase();
-   
-     
-      bancoInterno.processingdataOBD();
+      bancoInterno.processingdataOBD(process,keys);
     }
-  }
-
-  Future<int> verify() async {
-    Box box = await Hive.openBox<UserVehicles>('uservehicledata');
-    var help =
-        box.values.where((user) => user.uservehicle.userdata.isOnline == false);
-    return help.length;
   }
 
 

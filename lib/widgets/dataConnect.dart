@@ -46,8 +46,8 @@ class _ConnectState extends State<Data_Connect> {
   List<ObdRawData> _responses = [];
   List<Userdata> savejson = [];
   ObdData vin = ObdData(response: '', title: '', unit: '');
-  late Box confapp;
-  late Confdata confdata;
+  Box? confapp;
+  Confdata? confdata;
 
   bool teste = true;
 
@@ -70,9 +70,15 @@ class _ConnectState extends State<Data_Connect> {
   );
   late StreamSubscription<Position> _positionStream;
 
+
+  double roundDouble(double value, int places){ 
+   num mod = pow(10.0, places); 
+   return ((value * mod).round().toDouble() / mod); 
+  }
+  
   Future<Position> _determinePosition() async {
     // Test if location services are enabled.
-    _gpsServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    _gpsServiceEnabled = await Geolocator.isLocationServiceEnabled() ;
     if (!_gpsServiceEnabled) {
       // Location services are not enabled don't continue
       // accessing the position and request users of the
@@ -80,10 +86,10 @@ class _ConnectState extends State<Data_Connect> {
       return Future.error('Location services are disabled.');
     }
 
-    _permission ??= await Geolocator.checkPermission();
+    _permission ??= await  Geolocator.checkPermission();
 
     if (_permission == LocationPermission.denied) {
-      _permission = await Geolocator.requestPermission();
+      _permission = await Geolocator.requestPermission() ;
       if (_permission == LocationPermission.denied) {
         // Permissions are denied, next time you could try
         // requesting permissions again (this is also where
@@ -152,131 +158,138 @@ class _ConnectState extends State<Data_Connect> {
                 "status": true
             },
   */
+  @pragma('vm:entry-point')
   void simuobdtime() {
-    int i = 0;
+  
     Timer.periodic(
-      const Duration(milliseconds: 2500),
+       Duration(seconds: int.parse(confdata!.timereqobd)),
       (timer) async {
         _timer = timer;
+      
         if (widget.statewidget == true) {
+        
+          
+        
           if (_position != null) {
-            PositionClass pc = PositionClass(lat: 0.0, long: 0.0);
+            
             GeoPoint actualPosition =
                 GeoPoint(_position!.latitude, _position!.longitude);
-            pc.lat = actualPosition.latitude;
-            pc.long = actualPosition.longitude;
+            PositionClass pc = PositionClass(lat: _position!.latitude, long: _position!.longitude);
+            pc.lat = roundDouble(actualPosition.latitude, 4);
+            pc.long = roundDouble(actualPosition.longitude, 4);
             LatLng aux =
-                LatLng(actualPosition.latitude, actualPosition.longitude);
+                LatLng(roundDouble(actualPosition.latitude, 4),roundDouble(actualPosition.longitude, 4));
 
             widget.points?.add(aux);
-          Random random = Random();
-          List<ObdRawData> responses1 = [];
-          ObdData help2 = ObdData(
+          
+            Random random = Random();
+            List<ObdRawData> responses1 = [];
+            ObdData help2 = ObdData(
               unit: "g/s",
               title: "fluxo de massa de ar (MAF)",
               response: (random.nextInt(
-                          confdata.mafmax.toInt() - confdata.mafmin.toInt()) +
-                      confdata.mafmin.toInt())
+                          confdata!.mafmax.toInt() - confdata!.mafmin.toInt()) +
+                      confdata!.mafmin.toInt())
                   .toString());
-          ObdRawData help1 = ObdRawData(pid: '01 10', obddata: help2);
-          responses1.add(help1);
+            ObdRawData help1 = ObdRawData(pid: '01 10', obddata: help2);
+            responses1.add(help1);
 
-          help2 = ObdData(
+            help2 = ObdData(
               unit: "Km/h",
               title: "velocidade",
-              response: (random.nextInt(confdata.velomax - confdata.velomin) +
-                      confdata.velomin)
+              response: (random.nextInt(confdata!.velomax - confdata!.velomin) +
+                      confdata!.velomin)
                   .toString());
-          help1 = ObdRawData(pid: '01 0D', obddata: help2);
-          responses1.add(help1);
+            help1 = ObdRawData(pid: '01 0D', obddata: help2);
+            responses1.add(help1);
 
-          help2 = ObdData(
+            help2 = ObdData(
               unit: "kPa",
               title: "pressao absoluta do coletor de admissao",
-              response: (random.nextInt(confdata.pressmax.toInt() -
-                          confdata.pressmin.toInt()) +
-                      confdata.pressmin.toInt())
+              response: (random.nextInt(confdata!.pressmax.toInt() -
+                          confdata!.pressmin.toInt()) +
+                      confdata!.pressmin.toInt())
                   .toString());
-          help1 = ObdRawData(pid: '01 0B', obddata: help2);
-          responses1.add(help1);
+            help1 = ObdRawData(pid: '01 0B', obddata: help2);
+            responses1.add(help1);
 
-          help2 = ObdData(
+            help2 = ObdData(
               unit: "\u00b0C",
               title: "temperatura do ar de entrada",
-              response: (random.nextInt(confdata.tempaemax.toInt() -
-                          confdata.tempaemin.toInt()) +
-                      confdata.tempaemin.toInt())
+              response: (random.nextInt(confdata!.tempaemax.toInt() -
+                          confdata!.tempaemin.toInt()) +
+                      confdata!.tempaemin.toInt())
                   .toString());
-          help1 = ObdRawData(pid: '01 0F', obddata: help2);
-          responses1.add(help1);
+            help1 = ObdRawData(pid: '01 0F', obddata: help2);
+            responses1.add(help1);
 
-          help2 = ObdData(
+            help2 = ObdData(
               unit: "\u00b0C",
               title: "Temperatura do liquido de arrefecimento",
-              response: (random.nextInt(confdata.templamax.toInt() -
-                          confdata.templamin.toInt()) +
-                      confdata.templamin.toInt())
+              response: (random.nextInt(confdata!.templamax.toInt() -
+                          confdata!.templamin.toInt()) +
+                      confdata!.templamin.toInt())
                   .toString());
-          help1 = ObdRawData(pid: '01 0F', obddata: help2);
-          responses1.add(help1);
+            help1 = ObdRawData(pid: '01 0F', obddata: help2);
+            responses1.add(help1);
 
-          vin = ObdData(unit: "", title: "VIN", response: confdata.vin);
-          //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
-          //_responses1.add(help1);
+            vin = ObdData(unit: "", title: "VIN", response: confdata!.vin);
+            //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
+            //_responses1.add(help1);
 
-          help2 = ObdData(
+            help2 = ObdData(
               unit: "%",
               title: "nivel de combustivel",
               response: (random.nextDouble() *
-                          (confdata.pressmax - confdata.pressmin) +
-                      confdata.pressmin)
+                          (confdata!.pressmax - confdata!.pressmin) +
+                      confdata!.pressmin)
                   .toString());
-          help1 = ObdRawData(pid: '01 2F', obddata: help2);
-          responses1.add(help1);
+            help1 = ObdRawData(pid: '01 2F', obddata: help2);
+            responses1.add(help1);
 
-          help2 = ObdData(
+            help2 = ObdData(
               unit: "RPM",
               title: "rotacao",
               response:
-                  (random.nextDouble() * (confdata.rpmmax - confdata.rpmmin) +
-                          confdata.rpmmin)
+                  (random.nextDouble() * (confdata!.rpmmax - confdata!.rpmmin) +
+                          confdata!.rpmmin)
                       .toString());
-          help1 = ObdRawData(pid: '01 0C', obddata: help2);
-          responses1.add(help1);
-          setState(() {
-            _responses = responses1;
-          });
+            help1 = ObdRawData(pid: '01 0C', obddata: help2);
+            responses1.add(help1);
+            setState(() {
+              _responses = responses1;
+            });
 
-          String? uniqueid;
+            String? uniqueid;
 
-          if (Platform.isIOS) {
-            var iosDeviceInfo = await deviceInfo.iosInfo;
-            uniqueid = iosDeviceInfo.identifierForVendor;
-          } else if (Platform.isAndroid) {
-            var androidDeviceInfo = await deviceInfo.androidInfo;
-            uniqueid = androidDeviceInfo.id;
-          }
-          UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
-          
+            if (Platform.isIOS) {
+              var iosDeviceInfo = await deviceInfo.iosInfo;
+              uniqueid = iosDeviceInfo.identifierForVendor;
+            } else if (Platform.isAndroid) {
+              var androidDeviceInfo = await deviceInfo.androidInfo;
+              uniqueid = androidDeviceInfo.id;
+            }
+            UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
+         
 
-          if (_userAccelEvt != null) {
+            if (_userAccelEvt != null) {
             Map accel = {};
-            accel['x'] = _userAccelEvt?.x.toString();
-            accel['y'] = _userAccelEvt?.y.toString();
-            accel['z'] = _userAccelEvt?.z.toString();
-            accel['unit'] = 'm/s^2';
-            acc.x = accel['x'];
-            acc.y = accel['y'];
-            acc.z = accel['z'];
-            acc.unit = accel['unit'];
-          }
+              accel['x'] = _userAccelEvt?.x.toString();
+              accel['y'] = _userAccelEvt?.y.toString();
+              accel['z'] = _userAccelEvt?.z.toString();
+              accel['unit'] = 'm/s^2';
+              acc.x = accel['x'];
+              acc.y = accel['y'];
+              acc.z = accel['z'];
+              acc.unit = accel['unit'];
+            }
 
           
         
          
-          bool a = await checkUserConnection();
+            bool a = await checkUserConnection();
 
-          UserDataProcess save = UserDataProcess(
+            UserDataProcess save = UserDataProcess(
               processada: false,
               isOnline: false,
               signature: '',
@@ -284,31 +297,31 @@ class _ConnectState extends State<Data_Connect> {
               acc: acc,
               pos: pc,
               time: DateTime.now());
-          var signature = await sign(save).then((signature) => signature);
-          save.signature = signature.toString();
-          UserVehicleRaw vehicledata =
+            var signature = await sign(save).then((signature) => signature);
+            save.signature = signature.toString();
+            UserVehicleRaw vehicledata =
               UserVehicleRaw(userdata: save, vin: vin.response);
 
-          Userdata tobesaved =
+            Userdata tobesaved =
               Userdata(name: uniqueid!, uservehicle: vehicledata);
-          if (save.isOnline) {
             savejson.add(tobesaved);
 
             var userd = tobesaved.toJson();
             data.add(userd);
+            if (save.isOnline) {
+          
             //Repository.add(tobesaved);
             bancoInterno.insertObdData(tobesaved);
-          } else {
+            } else {
             bancoInterno.insertObdData(tobesaved);
-          }
-          i++;
-
-          await Future.delayed(
-            const Duration(milliseconds: 2500),
-          );
-        } else {
+            }
+       
+            await Future.delayed(
+             Duration(seconds: int.parse(confdata!.timereqobd) ),
+            );
+        } 
+        }else {
           timer.cancel();
-        }
         }
       }
     );
@@ -316,14 +329,14 @@ class _ConnectState extends State<Data_Connect> {
 
   void sendrequestOBDData() {
     Timer.periodic(
-      const Duration(milliseconds: 2500),
+       Duration(seconds: int.parse(confdata!.timereqobd) ),
       (timer) async {
         _timer = timer;
         if (widget.obd2.connection?.isConnected != false &&
             widget.obd2.connection?.isConnected != null) {
           await Future.delayed(
             Duration(
-              milliseconds: await widget.obd2.getParamsFromJSON('''
+              seconds: await widget.obd2.getParamsFromJSON('''
         [        
             {
                 "PID": "01 0C",
@@ -371,17 +384,25 @@ class _ConnectState extends State<Data_Connect> {
     );
   }
 
+  @pragma('vm:entry-point')
   void obdinfo() async {
     if (!(await widget.obd2.isListenToDataInitialed)) {
       widget.obd2.setOnDataReceived((command, response, requestCode) async {
+       
       if (_position != null) {
-         PositionClass pc = PositionClass(lat: 0.0, long: 0.0);
-          PositionClass pc2 = PositionClass(lat: 0.0, long: 0.0);
+        
          GeoPoint actualPosition =
               GeoPoint(_position!.latitude, _position!.longitude);
+          PositionClass pc = PositionClass(lat: _position!.latitude, long: _position!.longitude);
+          PositionClass pc2 = PositionClass(lat: _position!.latitude, long: _position!.longitude);     
           pc2 = pc;
-          pc.lat = actualPosition.latitude;
-          pc.long = actualPosition.longitude;
+
+          pc.lat = roundDouble(actualPosition.latitude, 4);
+          pc.long = roundDouble(actualPosition.longitude, 4);
+          LatLng aux =
+                LatLng(roundDouble(actualPosition.latitude, 4),roundDouble(actualPosition.longitude, 4
+                ));
+
           int R = 6371;
           var x1 = R * cos(pc2.lat) * cos(pc2.long );
           var y1 = R * cos(pc2.lat) * sin(pc2.long );
@@ -394,15 +415,13 @@ class _ConnectState extends State<Data_Connect> {
           var deltkmeu =
               sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) + pow(z2 - z1, 2));
           if(deltkmeu/1000<60)  {  
-          LatLng aux =
-              LatLng(actualPosition.latitude, actualPosition.longitude);
-
+   
           widget.points?.add(aux);
-       
+        }       
         List resps = jsonDecode(response);
         List<ObdRawData> responses1 = [];
         ObdData vin2 = ObdData(unit: '', title: '', response: '');
-        print(resps);
+        
         if (resps.isNotEmpty) {
           for (var reading in resps) {
             if (reading['PID'] == '09 02 5') {
@@ -417,7 +436,7 @@ class _ConnectState extends State<Data_Connect> {
                   response: reading['response']);
               ObdRawData help1 =
                   ObdRawData(pid: reading['PID'], obddata: help2);
-              print(reading['title']);  
+               
               responses1.add(help1);
             }
           }
@@ -461,7 +480,7 @@ class _ConnectState extends State<Data_Connect> {
             time: DateTime.now());
         var signature = await sign(save).then((signature) => signature);
         save.signature = signature.toString();
-            UserVehicleRaw vehicledata = UserVehicleRaw(userdata: save, vin: confdata.name);
+            UserVehicleRaw vehicledata = UserVehicleRaw(userdata: save, vin: confdata!.name);
             if(vin.response!=''){
               vehicledata =UserVehicleRaw(userdata: save, vin: vin.response);
             }
@@ -469,17 +488,20 @@ class _ConnectState extends State<Data_Connect> {
 
         Userdata tobesaved =
             Userdata(name: uniqueid!, uservehicle: vehicledata);
+        savejson.add(tobesaved);
+        var userd = tobesaved.toJson();
+        data.add(userd);
+         
         if (save.isOnline) {
-          savejson.add(tobesaved);
-
-          var userd = tobesaved.toJson();
-          data.add(userd);
+         
+         
           //Repository.add(tobesaved);
           bancoInterno.insertObdData(tobesaved);
         } else {
           bancoInterno.insertObdData(tobesaved);
         }
-      } }});
+      }
+    });
       sendrequestOBDData();
     }
   }
@@ -487,15 +509,14 @@ class _ConnectState extends State<Data_Connect> {
   void getinfo() async {
     final diretorioUsuario = await path_prov.getApplicationDocumentsDirectory();
 
-    //print(path_prov.getDownloadsDirectory());
-    //print(path_prov.getLibraryDirectory());
+
     File file = File(
         diretorioUsuario.path + "/" + DateTime.now().toString() + '.json');
     String terre = "${diretorioUsuario.path}/${DateTime.now()}";
     file.create();
     int ui = 0;
 
-    if (confdata.on == true) {
+    if (confdata!.on == true) {
       simuobdtime();
     } else {
       obdinfo();
@@ -504,9 +525,48 @@ class _ConnectState extends State<Data_Connect> {
     ui++;
   }
 
-  void init() async {
+  Future<void> init() async {
+
     confapp = await Hive.openBox<Confdata>('conf');
-    confdata = confapp.getAt(0);
+    print(confapp!.values.length);
+    if(confapp==null){
+      var bancoInterno = InternalDatabase();
+      bancoInterno.init();
+      
+      var a = Confdata(
+        rpmmin: 750,
+        rpmmax: 10000,
+        velomin: 0,
+        velomax: 120,
+        templamin: 90,
+        templamax: 104.4,
+        pressmin: 14.7,
+        pressmax: 101,
+        vin: '1GBJC34R9XF017297',
+        tempaemin: 30,
+        tempaemax: 70,
+        mafmin: 400,
+        mafmax: 1000,
+        percentmin: 50,
+        percentmax: 70,
+        responseobddata: [],
+        name: 'Appteste',
+        timereqobd: '1',
+        on: false);
+        confdata = a;
+        
+    }
+    
+    else{
+      confdata = confapp!.getAt(0);
+      setState(() {
+        confdata;
+      });
+    }
+ 
+ 
+   
+    
   }
 
   void saveData() async {
@@ -518,8 +578,8 @@ class _ConnectState extends State<Data_Connect> {
   @override
   void initState() {
     super.initState();
-    init();
-    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+    init().then((value) {
+        userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       _userAccelEvt = event;
     });
 
@@ -533,21 +593,22 @@ class _ConnectState extends State<Data_Connect> {
     });
 
     getinfo();
+    });
+  
   }
 
   @override
   void dispose() async {
     super.dispose();
     _timer!.cancel();
-    final diretorioUsuario = await path_prov.getApplicationDocumentsDirectory();
-
-    //print(path_prov.getDownloadsDirectory());
-    //print(path_prov.getLibraryDirectory());
-    File file = File(
-        diretorioUsuario.path + "/" + DateTime.now().toString() + '.json');
-    String terre = "${diretorioUsuario.path}/${DateTime.now()}";
+    final diretorioUsuario = await path_prov.getExternalStorageDirectory();
+  
+   File file = File(
+      diretorioUsuario!.path + "/" + DateTime.now().toString() + '.json');
+   
     file.create();
     const JsonEncoder encoder = JsonEncoder();
+   
     final String jsonString = encoder.convert(data);
     file.writeAsStringSync(jsonString);
     _positionStream.cancel();

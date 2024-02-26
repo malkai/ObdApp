@@ -13,6 +13,7 @@ class Confwidget extends StatefulWidget {
 class _ConfwidgetState extends State<Confwidget> {
   late Box confapp;
   var myController = TextEditingController(text:'Appteste');
+  var speed = TextEditingController(text:'1');
   Confdata confdata = Confdata(
       rpmmin: 750,
       rpmmax: 10000,
@@ -42,6 +43,7 @@ class _ConfwidgetState extends State<Confwidget> {
     });
     confapp.close();
     myController = TextEditingController(text: confdata.name);
+    speed = TextEditingController(text: confdata.timereqobd);
   }
 
   @override
@@ -126,6 +128,24 @@ class _ConfwidgetState extends State<Confwidget> {
                                 ),
                                      ),
                                    ),
+                              Container(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                     child: TextFormField(
+                                     
+                                      controller: speed,
+                                       decoration: const InputDecoration(
+                                         border: UnderlineInputBorder(),
+                                         labelText: 'Velocidade de requisição de dados',
+                                       ),
+                                        onChanged: (values) => setState(
+                                  () {
+                                    confdata.timereqobd = speed.text;
+                                  
+                                  },
+                                ),
+                                     ),
+                                   ),     
                               Container(
                                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                                   child: const Text('Velocidade KM/H')),
@@ -249,19 +269,7 @@ class _ConfwidgetState extends State<Confwidget> {
                                   },
                                 ),
                               ),
-                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                      child: const Text('Nome do condutor ')),
-                              
-                                 
-                                ],
-                              ),
-
-                             
+                   
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
