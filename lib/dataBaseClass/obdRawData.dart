@@ -2,7 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 part 'obdRawData.g.dart';
 
 @HiveType(typeId: 2)
-class Userdata  extends HiveObject {
+class Userdata extends HiveObject {
   @HiveField(0)
   String name;
   @HiveField(1)
@@ -152,6 +152,11 @@ class ObdData {
   String title;
   @HiveField(3)
   String response;
+  @HiveField(4)
+  List codes = [];
+  @HiveField(5)
+  List codesvalues = [];
+
   ObdData({
     required this.unit,
     required this.title,

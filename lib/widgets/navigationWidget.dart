@@ -5,35 +5,46 @@ class BottonWidget extends StatefulWidget {
   TabsRouter tabsRouter;
 
   BottonWidget({
-    Key? key,
+    super.key,
     required this.tabsRouter,
-  }) : super(key: key);
+  });
 
   @override
   State<BottonWidget> createState() => _BottonWidgetState();
 }
 
 class _BottonWidgetState extends State<BottonWidget> {
+  int optionindex = 0;
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-        selectedItemColor: Colors.black87,
-        unselectedItemColor: Colors.grey.withOpacity(0.5),
-        currentIndex: widget.tabsRouter.activeIndex,
-        onTap: widget.tabsRouter.setActiveIndex,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Corrida',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Histórico',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configuração',
-          ),
-        ]);
+      onTap: (option) {
+        print(option);
+        setState(() {
+          optionindex = option;
+
+          widget.tabsRouter.setActiveIndex(option);
+        });
+      },
+      backgroundColor: const Color(0xFF008355),
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey.withOpacity(0.9),
+      currentIndex: optionindex,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Corrida',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.business),
+          label: 'Histórico',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: 'Configuração',
+        ),
+      ],
+    );
   }
 }

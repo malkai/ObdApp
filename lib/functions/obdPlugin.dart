@@ -304,10 +304,12 @@ class ObdPlugin {
   }
 
   Future<void> _write(String command, int requestCode) async {
+    final stopwatch = Stopwatch()..start();
     lastetCommand = command;
     this.requestCode = requestCode;
     connection?.output.add(Uint8List.fromList(utf8.encode("$command\r\n")));
     await connection?.output.allSent;
+    print('doSomething() executed in ${stopwatch.elapsed}');
   }
 
   final double _volEff = 0.8322;
@@ -341,15 +343,16 @@ class ObdPlugin {
     if (this.onResponse != null) {
       throw Exception("onDataReceived is preset and you can not reprogram it");
     } else {
-      //print(response);
       this.onResponse = onResponse;
       connection?.input?.listen((Uint8List data) {
         Uint8List bytes = Uint8List.fromList(data.toList());
         String string = String.fromCharCodes(bytes);
+        //if( runningService["conversion"]==false){ return response; }
         if (!string.contains('>')) {
           response += string;
         } else {
           response += string;
+
           if (this.onResponse != null) {
             if (commandMode == Mode.parameter) {
               dynamic dyResponse = "";

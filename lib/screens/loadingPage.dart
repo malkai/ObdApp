@@ -1,9 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/appLoading.dart';
 
-class Loadingpage extends StatelessWidget {
-  const Loadingpage({Key? key}) : super(key: key);
+@RoutePage()
+class loadingpage extends StatelessWidget {
+  const loadingpage({super.key});
 
   @override
   Widget build(BuildContext context) {

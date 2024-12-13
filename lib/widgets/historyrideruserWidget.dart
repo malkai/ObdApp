@@ -9,8 +9,7 @@ class HistoryRideUser extends StatefulWidget {
   final VoidCallback hide;
   var userlist;
 
-  HistoryRideUser({Key? key, required this.hide, required this.userlist})
-      : super(key: key);
+  HistoryRideUser({super.key, required this.hide, required this.userlist});
 
   @override
   State<HistoryRideUser> createState() => _ObdDataMapState();
@@ -42,21 +41,19 @@ class _ObdDataMapState extends State<HistoryRideUser> {
 
       lat.add(a);
     }
-    for (int i = 0; i < aux.vehicle.kmaccarre.length - 1; i++) {
 
+    print(lat);
+    for (int i = 0; i < aux.vehicle.kmaccarre.length - 1; i++) {
       infokm2.add(
           kmData(aux.vehicle.kmaccarre[i], aux.vehicle.taccarr[i].toString()));
-    
+
       infof.add(fuelData(
           aux.vehicle.farrk[i], aux.vehicle.fuelkf[i], aux.vehicle.taccarr[i]));
     }
-    print(aux.vehicle.kmaccarrv.length );
+    print(aux.vehicle.kmaccarrv.length);
     for (int i = 0; i < aux.vehicle.kmaccarrv.length - 1; i++) {
-
       infokm3.add(
           kmData(aux.vehicle.kmaccarrv[i], aux.vehicle.taccarr[i].toString()));
-        
-      
     }
     setState(
       () {
@@ -87,22 +84,20 @@ class _ObdDataMapState extends State<HistoryRideUser> {
               height: 250,
               child: FlutterMap(
                 options: MapOptions(
-                  center: LatLng(widget.userlist.vehicle.points[a][0],
+                  initialCenter: LatLng(widget.userlist.vehicle.points[a][0],
                       widget.userlist.vehicle.points[a][1]),
-                  zoom: 15,
+                  initialZoom: 15,
                   maxZoom: 19,
-                  interactiveFlags:
-                      InteractiveFlag.all - InteractiveFlag.rotate,
                 ),
                 children: [
                   TileLayer(
                     maxZoom: 19,
                     urlTemplate:
-                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     subdomains: const ['a', 'b', 'c'],
                     userAgentPackageName: 'dev.fleaflet.flutter_map.example',
                   ),
-                  PolylineLayer(polylineCulling: false, polylines: [
+                  PolylineLayer(polylines: [
                     Polyline(
                       strokeWidth: 5,
                       points: lat,
@@ -174,12 +169,10 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                 ),
                                 Textdata(
                                   tipo: 'Tempo ',
-                                  texto:
-                                      '${widget.userlist.vehicle.tacc} s',
+                                  texto: '${widget.userlist.vehicle.tacc} s',
                                 ),
                               ],
                             ),
-                        
                             Column(
                               children: [
                                 Textdata(
@@ -255,7 +248,6 @@ class _ObdDataMapState extends State<HistoryRideUser> {
                                 ),
                               ],
                             ),
-                           
                             Textdata(
                               tipo: 'Data ',
                               texto: widget.userlist.vehicle.time.toString(),

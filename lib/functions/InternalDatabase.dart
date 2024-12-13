@@ -27,9 +27,23 @@ class InternalDatabase {
     Hive.registerAdapter(ConfdataAdapter());
     Hive.registerAdapter(VinAdapter());
    */
-    confapp = await  Hive.openBox<Confdata>('conf');
+    confapp = await Hive.openBox<Confdata>('conf');
     if (confapp.length <= 0) {
       newvalue();
+    }
+  }
+
+  Future<void> handledata() async {
+    List<int> keys = [];
+    Box<Userdata> obdData = await Hive.openBox<Userdata>('obdData');
+    var process = obdData.values
+        .where((element) => element.uservehicle.userdata.processada == false);
+    for (var element in process) {
+      keys.add(element.key);
+    }
+    if (process.isNotEmpty) {
+      var bancoInterno = InternalDatabase();
+      bancoInterno.processingdataOBD(process, keys);
     }
   }
 
@@ -55,9 +69,8 @@ class InternalDatabase {
         timereqobd: '1',
         on: false);
 
-    var confapp = await  Hive.openBox<Confdata>('conf');
+    var confapp = await Hive.openBox<Confdata>('conf');
     await confapp.add(a);
-  
   }
 
   bool isON() {
@@ -66,15 +79,13 @@ class InternalDatabase {
     } else {
       return false;
     }
-   
   }
-
-  
 
   void insertObdData(var data) async {
     var obdData = await Hive.openBox<Userdata>('obdData');
-    if(obdData.containsKey(data)==false){
-    obdData.add(data);}
+    if (obdData.containsKey(data) == false) {
+      obdData.add(data);
+    }
   }
 
   int validInfo(Userdata element) {
@@ -99,11 +110,8 @@ class InternalDatabase {
     return 0;
   }
 
-
-  void processingdataOBD( var process, var keys ) async {
-   
-
-   /*
+  void processingdataOBD(var process, var keys) async {
+    /*
     Box obdData = await Hive.openBox<Userdata>('obdData') ;
     var processados = obdData.values
         .where((element) => element.uservehicle.userdata.processada == false);
@@ -126,7 +134,6 @@ class InternalDatabase {
     List tarr = [0.0];
     List taccarr = [0.0];
 
-
     double kmacce = 0;
     List kmarre = [0.0];
     List kmaccarre = [0.0];
@@ -140,13 +147,12 @@ class InternalDatabase {
     List points = [];
 
     double lat1 = 0, lat2 = 0, long1 = 0, long2 = 0;
-    
+
     var start = Location(0, 0);
     int i = 0;
     int p = 0;
-  
+
     for (Userdata element in process) {
-   
       p += validInfo(element);
 
       if (vin1 == '') {
@@ -168,16 +174,13 @@ class InternalDatabase {
 
       points.add([lat2, long2]);
       if (time2.difference(time1).inSeconds < 1000) {
-      
         if (time2 != time1) {
-
           //math total time
           var deltt = (time2.difference(time1).inSeconds);
 
           tacc += deltt.toDouble();
           tarr.add(deltt.toDouble());
           taccarr.add(tacc.toDouble());
-
 
           //math Eucledean
           int R = 6371;
@@ -196,8 +199,7 @@ class InternalDatabase {
           kmarre.add(deltkmeu.toDouble());
           kmaccarre.add(kmacce.toDouble());
           var deltkmobd = 0.0;
-         
-         
+
           //math VS obd
           try {
             deltkmobd = double.parse(element.uservehicle.userdata.userdata
@@ -209,7 +211,7 @@ class InternalDatabase {
             deltkmobd = 0.0;
           }
           kmarrv.add(deltkmobd.toDouble());
-          kmaccv =kmaccv + deltkmobd;
+          kmaccv = kmaccv + deltkmobd;
           kmaccarrv.add(kmaccv);
           try {
             double fuelhelp = double.parse(element.uservehicle.userdata.userdata
@@ -229,8 +231,6 @@ class InternalDatabase {
       }
       if (vin1 != element.uservehicle.vin || element == process.last) {
         if (kmarrv.length > 1 && farrk.length > 1) {
-          
-    
           List auxf = insertEventInstance.kalmanfilter(farrk);
 
           var b = Vin(
@@ -251,9 +251,9 @@ class InternalDatabase {
 
           var userdataride = UserVehicles(user: element.name, vehicle: b);
 
-          Box teste2 =  await Hive.openBox<UserVehicles>('userdata') ;
-          if(teste2.containsKey(userdataride)==false){
-             teste2.add(userdataride).then((value) {
+          Box teste2 = await Hive.openBox<UserVehicles>('userdata');
+          if (teste2.containsKey(userdataride) == false) {
+            teste2.add(userdataride).then((value) {
               p = 0;
               vin1 = '';
               tarr.clear();
@@ -278,10 +278,7 @@ class InternalDatabase {
             });
             await teste2.close();
           }
-        
-         
         }
-       
       }
       //print(process[i].uservehicle.userdata.processada);
       element.uservehicle.userdata.processada = true;
@@ -290,22 +287,12 @@ class InternalDatabase {
       //var ty = obdData.values.toList();
       //int index = ty.indexWhere((item) => item == element);
       //print(index);
-      
-    
-      
+
       await obdData.putAt(element.key, element);
-      
-      if(i<=process.length-1)
-      {
+
+      if (i <= process.length - 1) {
         i++;
       }
     }
-   
-
-   
-  
- 
   }
-  
- 
 }

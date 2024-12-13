@@ -263,19 +263,25 @@ class ObdDataAdapter extends TypeAdapter<ObdData> {
       unit: fields[0] as String,
       title: fields[1] as String,
       response: fields[3] as String,
-    );
+    )
+      ..codes = (fields[4] as List).cast<dynamic>()
+      ..codesvalues = (fields[5] as List).cast<dynamic>();
   }
 
   @override
   void write(BinaryWriter writer, ObdData obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.unit)
       ..writeByte(1)
       ..write(obj.title)
       ..writeByte(3)
-      ..write(obj.response);
+      ..write(obj.response)
+      ..writeByte(4)
+      ..write(obj.codes)
+      ..writeByte(5)
+      ..write(obj.codesvalues);
   }
 
   @override

@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../../ObdApp/windows"
+		},
+		{
+			"path": "../../../../ObdApp/macos"
+		},
+		{
+			"path": "../../../../ObdApp/linux"
+		},
+		{
+			"path": "../../../../ObdApp/ios"
+		}
+	],
+	"settings": {}
+}
