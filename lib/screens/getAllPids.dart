@@ -14,6 +14,8 @@ import 'package:obdapp/route/autoroute.dart';
 import 'package:obdapp/widgets/textWidget.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
 
+import '../dataBaseClass/pidDiscoveryClass.dart';
+
 @RoutePage()
 class getallpids extends StatefulWidget {
   const getallpids({super.key});
@@ -28,6 +30,7 @@ class _getallpidsState extends State<getallpids> {
   Timer? _timer;
   var bancoInterno = InternalDatabase();
   List data = [];
+  Box? pidAvaliable;
   List<ObdRawData> responses = [];
 
   var obd2 = ObdPlugin();
@@ -250,10 +253,28 @@ class _getallpidsState extends State<getallpids> {
   List pidA0r = [];
   late BluetoothDevice help;
 
+  Future<void> insetpid(var resp) async {
+    pidAvaliable = await Hive.openBox<ObdRawData>('codesAva');
+
+    if (pidAvaliable!.isEmpty) {
+      for (int i = 0; i < resp.length; i++) {
+        pidAvaliable!.add(resp[i]);
+      }
+    } else {
+      if (pidAvaliable!.isNotEmpty) {
+        for (int i = 0; i < resp.length; i++) {
+          pidAvaliable!.putAt(i, resp[i]);
+        }
+      }
+    }
+
+    await pidAvaliable?.close();
+  }
+
   Future<int> checkpis(var ui) async {
     var aux = ui.toString();
 
-    String jsonString = json.encode([ui]);
+    String jsonString = json.encode(ui);
 
     if (obd2.connection?.isConnected != false &&
         obd2.connection?.isConnected != null) {
@@ -384,6 +405,8 @@ class _getallpidsState extends State<getallpids> {
           responses;
         });
         String? uniqueid;
+
+        insetpid(responses);
       });
 
       var requeridResponse = [
@@ -438,14 +461,27 @@ class _getallpidsState extends State<getallpids> {
       ];
 
       await checkpis(requeridResponse);
+
       await Future.delayed(
         Duration(seconds: 5),
       );
+      if (await obd2.hasConnection) {
+        await obd2.connection!.close().then((onValue) async {
+          await obd2.connection!.finish().then((onValue) async {
+            await obd2.disconnect().then((onValue) async {
+              obd2.connection?.dispose();
+              var obd3 = ObdPlugin();
+              setState(() {
+                obd2 = obd3;
+              });
+            });
+          });
+        });
+      }
       //print("oi2");
       // await checkpis(requeridResponse[0]);
       //for (var ui in requeridResponse) {
       //  print("oi1");
-
       //}
     }
   }
@@ -460,6 +496,7 @@ class _getallpidsState extends State<getallpids> {
         context: context,
         builder: (BuildContext context) => TapRegion(
             onTapOutside: (tap) {
+              getpids();
               context.router.popUntilRouteWithName(Pidsdiscovery.name);
             },
             child: Container(
@@ -510,9 +547,27 @@ class _getallpidsState extends State<getallpids> {
     ui++;
   }
 
+  Future<void> getpids() async {
+    pid01r.clear();
+    pid20r.clear();
+    pid40r.clear();
+    pid60r.clear();
+    pid80r.clear();
+    pidA0r.clear();
+    responses.clear();
+    pidAvaliable = await Hive.openBox<ObdRawData>('codesAva');
+    print(pidAvaliable!.values.length);
+    if (pidAvaliable!.values.isNotEmpty) {
+      responses = pidAvaliable!.values.toList().cast<ObdRawData>();
+    }
+    setState(() {
+      responses;
+    });
+  }
+
   Future<void> init() async {
     confapp = await Hive.openBox<Confdata>('conf');
-
+    await getpids();
     if (confapp == null) {
       var bancoInterno = InternalDatabase();
       bancoInterno.init();
@@ -587,37 +642,18 @@ class _getallpidsState extends State<getallpids> {
                 color: Colors.white,
               ),
               onPressed: () async {
-                if (obd2.connection?.isConnected == null) {
-                  setState(() {
-                    pidAll = "Limpar";
-                  });
-                  if (!(await obd2.isBluetoothEnable)) {
-                    await obd2.enableBluetooth;
-                  }
-                  showBluetoothList(context, obd2);
-                } else {
-                  await obd2.connection!.close().then((onValue) async {
-                    await obd2.connection!.finish().then((onValue) async {
-                      await obd2.disconnect().then((onValue) async {
-                        obd2.connection?.dispose();
-                        pid01r.clear();
-                        pid20r.clear();
-                        pid40r.clear();
-                        pid60r.clear();
-                        pid80r.clear();
-                        pidA0r.clear();
-                        responses.clear();
-                        var obd3 = ObdPlugin();
-
-                        setState(() {
-                          obd2 = obd3;
-                        });
-                      });
-                    });
-                  });
-
-                  //context.router.popAndPush(Getallpids());
+                if (!(await obd2.isBluetoothEnable)) {
+                  await obd2.enableBluetooth;
                 }
+                pid01r.clear();
+                pid20r.clear();
+                pid40r.clear();
+                pid60r.clear();
+                pid80r.clear();
+                pidA0r.clear();
+                responses.clear();
+                showBluetoothList(context, obd2);
+
                 //_bluetooth.startDiscovery();
               },
             ),

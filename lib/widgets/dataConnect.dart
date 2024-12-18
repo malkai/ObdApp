@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:obdapp/widgets/MapGps.dart';
+import 'package:obdapp/widgets/acc.dart';
 
 import '../dataBaseClass/confSimu.dart';
 
@@ -21,17 +23,9 @@ import 'package:path_provider/path_provider.dart' as path_prov;
 import '../functions/InternalDatabase.dart';
 
 class Data_Connect extends StatefulWidget {
-  List<LatLng> points;
   final ObdPlugin obd2;
 
-  VoidCallback updatemap;
-  bool statewidget;
-  Data_Connect(
-      {super.key,
-      required this.points,
-      required this.obd2,
-      required this.updatemap,
-      required this.statewidget});
+  Data_Connect({super.key, required this.obd2});
   static _ConnectState of(BuildContext context) =>
       context.findAncestorStateOfType()!;
 
@@ -45,9 +39,11 @@ class _ConnectState extends State<Data_Connect> {
   List data = [];
   List<ObdRawData> _responses = [];
   List<Userdata> savejson = [];
+  double heigh1 = 400;
   ObdData vin = ObdData(response: '', title: '', unit: '');
 
   bool teste = true;
+  List<LatLng> points = [];
 
   UserAccelerometerEvent? _userAccelEvt;
 
@@ -69,6 +65,13 @@ class _ConnectState extends State<Data_Connect> {
     distanceFilter: 0,
   );
   late StreamSubscription<Position> _positionStream;
+
+  void updatemap() {
+    setState(() {
+      points;
+    });
+    print(points.length);
+  }
 
   double roundDouble(double value, int places) {
     num mod = pow(10.0, places);
@@ -163,176 +166,172 @@ class _ConnectState extends State<Data_Connect> {
         (timer) async {
       _timer = timer;
 
-      if (widget.statewidget == true) {
-        if (_position != null) {
-          GeoPoint actualPosition =
-              GeoPoint(_position!.latitude, _position!.longitude);
-          PositionClass pc = PositionClass(
-              lat: _position!.latitude, long: _position!.longitude);
-          pc.lat = roundDouble(actualPosition.latitude, 4);
-          pc.long = roundDouble(actualPosition.longitude, 4);
-          LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
-              roundDouble(actualPosition.longitude, 4));
+      if (_position != null) {
+        GeoPoint actualPosition =
+            GeoPoint(_position!.latitude, _position!.longitude);
+        PositionClass pc =
+            PositionClass(lat: _position!.latitude, long: _position!.longitude);
+        pc.lat = roundDouble(actualPosition.latitude, 4);
+        pc.long = roundDouble(actualPosition.longitude, 4);
+        LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
+            roundDouble(actualPosition.longitude, 4));
 
-          if (widget.points.length > 1 && widget.points.length < 2) {
-            var distance = Distance();
-            //create a new distance calculator with Haversine algorithm
-            distance = const Distance(calculator: Haversine());
+        if (points.length > 1 && points.length < 2) {
+          var distance = Distance();
+          //create a new distance calculator with Haversine algorithm
+          distance = const Distance(calculator: Haversine());
 
-            //create coordinates with NaN or Infinity state to check if the distance is calculated correctly
-            final point1 = aux;
-            final point2 = widget.points[0];
+          //create coordinates with NaN or Infinity state to check if the distance is calculated correctly
+          final point1 = aux;
+          final point2 = points[0];
 
-            var meterDistance = distance.as(LengthUnit.Meter, point1, point2);
+          var meterDistance = distance.as(LengthUnit.Meter, point1, point2);
 
-            if (meterDistance < 55.00) {
-              widget.points.add(aux);
-            } else {
-              widget.points[0] = aux;
-            }
+          if (meterDistance < 55.00) {
+            points.add(aux);
           } else {
-            widget.points.add(aux);
+            points[0] = aux;
           }
-
-          Random random = Random();
-          List<ObdRawData> responses1 = [];
-          ObdData help2 = ObdData(
-              unit: "g/s",
-              title: "fluxo de massa de ar (MAF)",
-              response: (random.nextInt(
-                          confdata!.mafmax.toInt() - confdata!.mafmin.toInt()) +
-                      confdata!.mafmin.toInt())
-                  .toString());
-          ObdRawData help1 = ObdRawData(pid: '01 10', obddata: help2);
-          responses1.add(help1);
-
-          help2 = ObdData(
-              unit: "Km/h",
-              title: "velocidade",
-              response: (random.nextInt(confdata!.velomax - confdata!.velomin) +
-                      confdata!.velomin)
-                  .toString());
-          help1 = ObdRawData(pid: '01 0D', obddata: help2);
-          responses1.add(help1);
-
-          help2 = ObdData(
-              unit: "kPa",
-              title: "pressao absoluta do coletor de admissao",
-              response: (random.nextInt(confdata!.pressmax.toInt() -
-                          confdata!.pressmin.toInt()) +
-                      confdata!.pressmin.toInt())
-                  .toString());
-          help1 = ObdRawData(pid: '01 0B', obddata: help2);
-          responses1.add(help1);
-
-          // print(widget.points.length);
-          widget.updatemap();
-          setState(() {
-            widget.points;
-            _responses = responses1;
-          });
-
-          help2 = ObdData(
-              unit: "\u00b0C",
-              title: "temperatura do ar de entrada",
-              response: (random.nextInt(confdata!.tempaemax.toInt() -
-                          confdata!.tempaemin.toInt()) +
-                      confdata!.tempaemin.toInt())
-                  .toString());
-          help1 = ObdRawData(pid: '01 0F', obddata: help2);
-          responses1.add(help1);
-
-          help2 = ObdData(
-              unit: "\u00b0C",
-              title: "Temperatura do liquido de arrefecimento",
-              response: (random.nextInt(confdata!.templamax.toInt() -
-                          confdata!.templamin.toInt()) +
-                      confdata!.templamin.toInt())
-                  .toString());
-          help1 = ObdRawData(pid: '01 0F', obddata: help2);
-          responses1.add(help1);
-
-          vin = ObdData(unit: "", title: "VIN", response: confdata!.vin);
-          //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
-          //_responses1.add(help1);
-
-          help2 = ObdData(
-              unit: "%",
-              title: "nivel de combustivel",
-              response: (random.nextDouble() *
-                          (confdata!.pressmax - confdata!.pressmin) +
-                      confdata!.pressmin)
-                  .toString());
-          help1 = ObdRawData(pid: '01 2F', obddata: help2);
-          responses1.add(help1);
-
-          help2 = ObdData(
-              unit: "RPM",
-              title: "rotacao",
-              response:
-                  (random.nextDouble() * (confdata!.rpmmax - confdata!.rpmmin) +
-                          confdata!.rpmmin)
-                      .toString());
-          help1 = ObdRawData(pid: '01 0C', obddata: help2);
-          responses1.add(help1);
-
-          String? uniqueid;
-
-          if (Platform.isIOS) {
-            var iosDeviceInfo = await deviceInfo.iosInfo;
-            uniqueid = iosDeviceInfo.identifierForVendor;
-          } else if (Platform.isAndroid) {
-            var androidDeviceInfo = await deviceInfo.androidInfo;
-            uniqueid = androidDeviceInfo.id;
-          }
-          UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
-
-          if (_userAccelEvt != null) {
-            Map accel = {};
-            accel['x'] = _userAccelEvt?.x.toString();
-            accel['y'] = _userAccelEvt?.y.toString();
-            accel['z'] = _userAccelEvt?.z.toString();
-            accel['unit'] = 'm/s^2';
-            acc.x = accel['x'];
-            acc.y = accel['y'];
-            acc.z = accel['z'];
-            acc.unit = accel['unit'];
-          }
-
-          bool a = await checkUserConnection();
-
-          UserDataProcess save = UserDataProcess(
-              processada: false,
-              isOnline: false,
-              signature: '',
-              userdata: _responses,
-              acc: acc,
-              pos: pc,
-              time: DateTime.now());
-          var signature = await sign(save).then((signature) => signature);
-          save.signature = signature.toString();
-          UserVehicleRaw vehicledata =
-              UserVehicleRaw(userdata: save, vin: vin.response);
-
-          Userdata tobesaved =
-              Userdata(name: uniqueid!, uservehicle: vehicledata);
-          savejson.add(tobesaved);
-
-          var userd = tobesaved.toJson();
-          data.add(userd);
-          if (save.isOnline) {
-            //Repository.add(tobesaved);
-            bancoInterno.insertObdData(tobesaved);
-          } else {
-            bancoInterno.insertObdData(tobesaved);
-          }
-
-          await Future.delayed(
-            Duration(seconds: int.parse(confdata!.timereqobd)),
-          );
+        } else {
+          points.add(aux);
         }
-      } else {
-        timer.cancel();
+
+        Random random = Random();
+        List<ObdRawData> responses1 = [];
+        ObdData help2 = ObdData(
+            unit: "g/s",
+            title: "fluxo de massa de ar (MAF)",
+            response: (random.nextInt(
+                        confdata!.mafmax.toInt() - confdata!.mafmin.toInt()) +
+                    confdata!.mafmin.toInt())
+                .toString());
+        ObdRawData help1 = ObdRawData(pid: '01 10', obddata: help2);
+        responses1.add(help1);
+
+        help2 = ObdData(
+            unit: "Km/h",
+            title: "velocidade",
+            response: (random.nextInt(confdata!.velomax - confdata!.velomin) +
+                    confdata!.velomin)
+                .toString());
+        help1 = ObdRawData(pid: '01 0D', obddata: help2);
+        responses1.add(help1);
+
+        help2 = ObdData(
+            unit: "kPa",
+            title: "pressao absoluta do coletor de admissao",
+            response: (random.nextInt(confdata!.pressmax.toInt() -
+                        confdata!.pressmin.toInt()) +
+                    confdata!.pressmin.toInt())
+                .toString());
+        help1 = ObdRawData(pid: '01 0B', obddata: help2);
+        responses1.add(help1);
+
+        // print(widget.points.length);
+        updatemap();
+        setState(() {
+          points;
+          _responses = responses1;
+        });
+
+        help2 = ObdData(
+            unit: "\u00b0C",
+            title: "temperatura do ar de entrada",
+            response: (random.nextInt(confdata!.tempaemax.toInt() -
+                        confdata!.tempaemin.toInt()) +
+                    confdata!.tempaemin.toInt())
+                .toString());
+        help1 = ObdRawData(pid: '01 0F', obddata: help2);
+        responses1.add(help1);
+
+        help2 = ObdData(
+            unit: "\u00b0C",
+            title: "Temperatura do liquido de arrefecimento",
+            response: (random.nextInt(confdata!.templamax.toInt() -
+                        confdata!.templamin.toInt()) +
+                    confdata!.templamin.toInt())
+                .toString());
+        help1 = ObdRawData(pid: '01 0F', obddata: help2);
+        responses1.add(help1);
+
+        vin = ObdData(unit: "", title: "VIN", response: confdata!.vin);
+        //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
+        //_responses1.add(help1);
+
+        help2 = ObdData(
+            unit: "%",
+            title: "nivel de combustivel",
+            response: (random.nextDouble() *
+                        (confdata!.pressmax - confdata!.pressmin) +
+                    confdata!.pressmin)
+                .toString());
+        help1 = ObdRawData(pid: '01 2F', obddata: help2);
+        responses1.add(help1);
+
+        help2 = ObdData(
+            unit: "RPM",
+            title: "rotacao",
+            response:
+                (random.nextDouble() * (confdata!.rpmmax - confdata!.rpmmin) +
+                        confdata!.rpmmin)
+                    .toString());
+        help1 = ObdRawData(pid: '01 0C', obddata: help2);
+        responses1.add(help1);
+
+        String? uniqueid;
+
+        if (Platform.isIOS) {
+          var iosDeviceInfo = await deviceInfo.iosInfo;
+          uniqueid = iosDeviceInfo.identifierForVendor;
+        } else if (Platform.isAndroid) {
+          var androidDeviceInfo = await deviceInfo.androidInfo;
+          uniqueid = androidDeviceInfo.id;
+        }
+        UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
+
+        if (_userAccelEvt != null) {
+          Map accel = {};
+          accel['x'] = _userAccelEvt?.x.toString();
+          accel['y'] = _userAccelEvt?.y.toString();
+          accel['z'] = _userAccelEvt?.z.toString();
+          accel['unit'] = 'm/s^2';
+          acc.x = accel['x'];
+          acc.y = accel['y'];
+          acc.z = accel['z'];
+          acc.unit = accel['unit'];
+        }
+
+        bool a = await checkUserConnection();
+
+        UserDataProcess save = UserDataProcess(
+            processada: false,
+            isOnline: false,
+            signature: '',
+            userdata: _responses,
+            acc: acc,
+            pos: pc,
+            time: DateTime.now());
+        var signature = await sign(save).then((signature) => signature);
+        save.signature = signature.toString();
+        UserVehicleRaw vehicledata =
+            UserVehicleRaw(userdata: save, vin: vin.response);
+
+        Userdata tobesaved =
+            Userdata(name: uniqueid!, uservehicle: vehicledata);
+        savejson.add(tobesaved);
+
+        var userd = tobesaved.toJson();
+        data.add(userd);
+        if (save.isOnline) {
+          //Repository.add(tobesaved);
+          bancoInterno.insertObdData(tobesaved);
+        } else {
+          bancoInterno.insertObdData(tobesaved);
+        }
+
+        await Future.delayed(
+          Duration(seconds: int.parse(confdata!.timereqobd)),
+        );
       }
     });
   }
@@ -411,26 +410,26 @@ class _ConnectState extends State<Data_Connect> {
           LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
               roundDouble(actualPosition.longitude, 4));
 
-          if (widget.points.length > 1 && widget.points.length < 2) {
+          if (points.length > 1 && points.length < 2) {
             var distance = Distance();
             //create a new distance calculator with Haversine algorithm
             distance = const Distance(calculator: Haversine());
 
             //create coordinates with NaN or Infinity state to check if the distance is calculated correctly
             final point1 = aux;
-            final point2 = widget.points[0];
+            final point2 = points[0];
 
             var meterDistance = distance.as(LengthUnit.Meter, point1, point2);
 
             if (meterDistance < 55.00) {
-              widget.points.add(aux);
+              points.add(aux);
             } else {
-              widget.points[0] = aux;
+              points[0] = aux;
             }
           } else {
-            widget.points.add(aux);
+            points.add(aux);
           }
-          widget.updatemap;
+          updatemap;
           List resps = jsonDecode(response);
           List<ObdRawData> responses1 = [];
           ObdData vin2 = ObdData(unit: '', title: '', response: '');
@@ -614,41 +613,69 @@ class _ConnectState extends State<Data_Connect> {
     final String jsonString = encoder.convert(data);
     file.writeAsStringSync(jsonString);
     _positionStream.cancel();
-    widget.points.clear();
+    points.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              children: [
-                Textdata(
-                  tipo: 'PID VIN',
-                  texto: vin.response == '' ? 'PID VIN' : vin.response,
-                ),
-                ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _responses.length,
-                  itemBuilder: (context, i) {
-                    return Column(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color.fromARGB(255, 255, 255, 255),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+              padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Accxyz()),
+          SizedBox(height: 10),
+          Builder(builder: (BuildContext context) {
+            return Container(height: 300, child: MapWidget(points: points));
+          }),
+          SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            height: 300,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+            ),
+            child: Center(
+                child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
                       children: [
                         Textdata(
-                          // print([i.pid, i.obddata.unit]);
-                          tipo: _responses[i].obddata.title == ''
-                              ? 'PID $i'
-                              : _responses[i].obddata.title,
-                          texto: _responses[i].obddata.unit == ''
-                              ? 'PID $i'
-                              : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
+                          tipo: 'PID VIN',
+                          texto: vin.response == '' ? 'PID VIN' : vin.response,
+                        ),
+                        ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: _responses.length,
+                          itemBuilder: (context, i) {
+                            return Column(
+                              children: [
+                                Textdata(
+                                  // print([i.pid, i.obddata.unit]);
+                                  tipo: _responses[i].obddata.title == ''
+                                      ? 'PID $i'
+                                      : _responses[i].obddata.title,
+                                  texto: _responses[i].obddata.unit == ''
+                                      ? 'PID $i'
+                                      : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
-                    );
-                  },
-                ),
-              ],
-            )));
+                    ))),
+          ),
+        ],
+      ),
+    );
   }
 }

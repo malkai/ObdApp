@@ -122,7 +122,7 @@ class Confdata {
   @HiveField(17)
   List<getobddata> responseobddata;
 
-   @HiveField(18)
+  @HiveField(18)
   String name;
 
   @HiveField(19)
@@ -172,8 +172,6 @@ class getobddata {
   String status;
 
   //14.7 - 101
- 
-
 
   getobddata({
     required this.pid,
@@ -182,6 +180,5 @@ class getobddata {
     required this.unit,
     required this.description,
     required this.status,
-    
   });
 }

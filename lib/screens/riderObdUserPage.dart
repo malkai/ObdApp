@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import '../widgets/initBluetooth.dart';
+import '../widgets/getdata.dart';
 
 @RoutePage()
 class ride extends StatelessWidget {
