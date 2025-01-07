@@ -93,10 +93,10 @@ class UserDataProcessAdapter extends TypeAdapter<UserDataProcess> {
     return UserDataProcess(
       time: fields[6] as DateTime,
       isOnline: fields[0] as bool,
-      userdata: (fields[3] as List).cast<ObdRawData>(),
+      userdata: (fields[3] as List?)?.cast<ObdRawData>(),
       signature: fields[2] as String,
-      acc: fields[4] as UserAcc,
-      pos: fields[5] as PositionClass,
+      acc: fields[4] as UserAcc?,
+      pos: fields[5] as PositionClass?,
       processada: fields[1] as bool,
     );
   }
@@ -225,17 +225,19 @@ class ObdRawDataAdapter extends TypeAdapter<ObdRawData> {
     return ObdRawData(
       pid: fields[0] as String,
       obddata: fields[1] as ObdData,
-    );
+    )..timer = fields[2] as int;
   }
 
   @override
   void write(BinaryWriter writer, ObdRawData obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.pid)
       ..writeByte(1)
-      ..write(obj.obddata);
+      ..write(obj.obddata)
+      ..writeByte(2)
+      ..write(obj.timer);
   }
 
   @override

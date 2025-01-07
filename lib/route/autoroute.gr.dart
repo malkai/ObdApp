@@ -82,25 +82,6 @@ class Getallpids extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [getselectpids]
-class Getselectpids extends PageRouteInfo<void> {
-  const Getselectpids({List<PageRouteInfo>? children})
-      : super(
-          Getselectpids.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'Getselectpids';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const getselectpids();
-    },
-  );
-}
-
-/// generated route for
 /// [historyuser]
 class Historyuser extends PageRouteInfo<void> {
   const Historyuser({List<PageRouteInfo>? children})

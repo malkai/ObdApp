@@ -120,12 +120,27 @@ class Confdata {
   bool on;
 
   @HiveField(17)
-  List<getobddata> responseobddata;
+  bool obd = true;
 
   @HiveField(18)
-  String name;
+  bool acc = true;
 
   @HiveField(19)
+  bool watch = false;
+
+  @HiveField(20)
+  bool phone = true;
+
+  @HiveField(21)
+  bool gps = true;
+
+  @HiveField(22)
+  List<getobddata> responseobddata;
+
+  @HiveField(23)
+  String name;
+
+  @HiveField(24)
   String timereqobd;
 
   Confdata({

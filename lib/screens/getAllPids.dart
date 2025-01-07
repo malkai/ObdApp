@@ -271,34 +271,15 @@ class _getallpidsState extends State<getallpids> {
     await pidAvaliable?.close();
   }
 
-  Future<int> checkpis(var ui) async {
-    var aux = ui.toString();
-
-    String jsonString = json.encode(ui);
+  void checkpis(var ui) async {
+    String jsonString = json.encode([ui]);
 
     if (obd2.connection?.isConnected != false &&
         obd2.connection?.isConnected != null) {
-      return await obd2.getParamsFromJSON(jsonString);
+      await obd2.getParamsFromJSON(jsonString);
     }
-    return 0;
-    /*
-    if (!(await obd2.isListenToDataInitialed)) {
-      obd2.setOnDataReceived(
-        (command, response, requestCode) async {
-          List resps = jsonDecode(response);
-          if (resps.isNotEmpty) {
-            for (var reading in resps) {
-              if (reading['PID'] == ui['PID']) {
-                pid01r.clear();
-              }
-            }
-          }
-        },
-      );
-    }
-    */
 
-    // ui["PID"] = ;
+    
   }
 
   @pragma('vm:entry-point')
@@ -306,7 +287,6 @@ class _getallpidsState extends State<getallpids> {
     if (!(await obd2.isListenToDataInitialed)) {
       obd2.setOnDataReceived((command, response, requestCode) async {
         List resps = jsonDecode(response);
-        List<ObdRawData> responses1 = [];
 
         if (resps.isNotEmpty) {
           for (var reading in resps) {
@@ -395,7 +375,7 @@ class _getallpidsState extends State<getallpids> {
               help2.codes = pidA0;
               help2.codesvalues = pidA0r;
             }
-            responses1.add(help1);
+
             responses.add(help1);
           }
         }
@@ -404,9 +384,7 @@ class _getallpidsState extends State<getallpids> {
         setState(() {
           responses;
         });
-        String? uniqueid;
-
-        insetpid(responses);
+      
       });
 
       var requeridResponse = [
@@ -460,23 +438,34 @@ class _getallpidsState extends State<getallpids> {
         },
       ];
 
-      await checkpis(requeridResponse);
+      int j = 1;
 
-      await Future.delayed(
-        Duration(seconds: 5),
-      );
+      int count = 0;
+
+      for (var i in requeridResponse) {
+        checkpis(i);
+
+        while (responses.length < j) {
+          await Future.delayed(
+            Duration(seconds: 1),
+          );
+          count += 1;
+          print(count);
+        }
+        print("oi");
+        responses[j - 1].timer = count;
+        j++;
+        count = 0;
+      }
+
+      insetpid(responses);
+
+      setState(() {
+        responses;
+      });
+
       if (await obd2.hasConnection) {
-        await obd2.connection!.close().then((onValue) async {
-          await obd2.connection!.finish().then((onValue) async {
-            await obd2.disconnect().then((onValue) async {
-              obd2.connection?.dispose();
-              var obd3 = ObdPlugin();
-              setState(() {
-                obd2 = obd3;
-              });
-            });
-          });
-        });
+        await obd2.connection!.close();
       }
       //print("oi2");
       // await checkpis(requeridResponse[0]);
@@ -511,15 +500,17 @@ class _getallpidsState extends State<getallpids> {
                     height: 50,
                     child: TextButton(
                       onPressed: () {
-                        obd2plugin.getConnection(devices[index], (connection) {
-                          try {
+                        obd2plugin.getConnection(devices[index],
+                            (connection) async {
+                          bool conn =  obd2.connection!.isConnected;
+                          if (conn) {
                             context.router
                                 .popUntilRouteWithName(Pidsdiscovery.name);
-                            getinfo();
-                          } catch (e) {
-                            print(e);
+                                  getinfo();
                           }
-                        }, (message) {});
+                        }, (message) {
+                          print(message);
+                        });
 
                         //Navigator.pop(context, aux);
                       },
@@ -642,17 +633,21 @@ class _getallpidsState extends State<getallpids> {
                 color: Colors.white,
               ),
               onPressed: () async {
+                obd2 = ObdPlugin();
                 if (!(await obd2.isBluetoothEnable)) {
                   await obd2.enableBluetooth;
                 }
-                pid01r.clear();
-                pid20r.clear();
-                pid40r.clear();
-                pid60r.clear();
-                pid80r.clear();
-                pidA0r.clear();
-                responses.clear();
-                showBluetoothList(context, obd2);
+
+                setState(() {
+                  pid01r.clear();
+                  pid20r.clear();
+                  pid40r.clear();
+                  pid60r.clear();
+                  pid80r.clear();
+                  pidA0r.clear();
+                  responses.clear();
+                });
+                await showBluetoothList(context, obd2);
 
                 //_bluetooth.startDiscovery();
               },
@@ -671,10 +666,16 @@ class _getallpidsState extends State<getallpids> {
                 itemCount: responses.length,
                 itemBuilder: (context, index) {
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(" " + responses[index].obddata.title),
-                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Text(" " + responses[index].obddata.title),
+                          SizedBox(width: 10),
+                          Text(" Tempo de Respsota " +
+                              responses[index].timer.toString()),
+                        ],
+                      ),
                       if (responses[index].obddata.codesvalues.isNotEmpty)
                         SelectionArea(
                           child: Column(

@@ -31,27 +31,7 @@ class _pidsdiscoveryState extends State<pidsdiscovery> {
         ),
         routes: const [
           Getallpids(),
-          Getselectpids(),
         ],
-        bottomNavigationBuilder: (_, tabsRouter) {
-          return BottomNavigationBar(
-            backgroundColor: const Color(0xFF008355),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.grey.withOpacity(0.9),
-            currentIndex: tabsRouter.activeIndex,
-            onTap: tabsRouter.setActiveIndex,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.fact_check),
-                label: 'Verificar Pids',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Buscar Pids',
-              ),
-            ],
-          );
-        },
       ),
     );
   }

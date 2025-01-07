@@ -92,13 +92,13 @@ class InternalDatabase {
     try {
       var vin = element.uservehicle.vin;
       var time = element.uservehicle.userdata.time;
-      double lat = element.uservehicle.userdata.pos.lat;
-      double long1 = element.uservehicle.userdata.pos.long;
-      var pressure = element.uservehicle.userdata.userdata
+      double lat = element.uservehicle.userdata.pos!.lat;
+      double long1 = element.uservehicle.userdata.pos!.long;
+      var pressure = element.uservehicle.userdata.userdata!
           .firstWhere((element) => element.pid == '01 2F')
           .obddata
           .response;
-      var vs = element.uservehicle.userdata.userdata
+      var vs = element.uservehicle.userdata.userdata!
           .firstWhere((element) => element.pid == '01 0D')
           .obddata
           .response;
@@ -111,20 +111,7 @@ class InternalDatabase {
   }
 
   void processingdataOBD(var process, var keys) async {
-    /*
-    Box obdData = await Hive.openBox<Userdata>('obdData') ;
-    var processados = obdData.values
-        .where((element) => element.uservehicle.userdata.processada == false);
-    var order = processados.toList()
-      ..sort((a, b) {
-        int nameComp = a.uservehicle.vin.compareTo(b.uservehicle.vin);
-        if (nameComp == 0) {
-          return a.uservehicle.userdata.time
-              .compareTo(b.uservehicle.userdata.time); // '-' for descending
-        }
-        return nameComp;
-      });
-    */
+  
     String vin1 = '';
 
     DateTime time1 = DateTime.parse('2020-01-02 03:04:05');
@@ -158,8 +145,8 @@ class InternalDatabase {
       if (vin1 == '') {
         vin1 = element.uservehicle.vin;
         time1 = DateTime.parse(element.uservehicle.userdata.time.toString());
-        lat1 = element.uservehicle.userdata.pos.lat;
-        long1 = element.uservehicle.userdata.pos.long;
+        lat1 = element.uservehicle.userdata.pos!.lat;
+        long1 = element.uservehicle.userdata.pos!.long;
         start = Location(lat1, long1);
 
         //LatLong.add([lat1, long1]);
@@ -167,8 +154,8 @@ class InternalDatabase {
       time1 = time2;
       time2 = DateTime.parse(element.uservehicle.userdata.time.toString());
 
-      lat2 = element.uservehicle.userdata.pos.lat;
-      long2 = element.uservehicle.userdata.pos.long;
+      lat2 = element.uservehicle.userdata.pos!.lat;
+      long2 = element.uservehicle.userdata.pos!.long;
 
       var end = Location(lat2, long2);
 
@@ -202,7 +189,7 @@ class InternalDatabase {
 
           //math VS obd
           try {
-            deltkmobd = double.parse(element.uservehicle.userdata.userdata
+            deltkmobd = double.parse(element.uservehicle.userdata.userdata!
                     .firstWhere((element) => element.pid == '01 0D')
                     .obddata
                     .response) *
@@ -214,7 +201,7 @@ class InternalDatabase {
           kmaccv = kmaccv + deltkmobd;
           kmaccarrv.add(kmaccv);
           try {
-            double fuelhelp = double.parse(element.uservehicle.userdata.userdata
+            double fuelhelp = double.parse(element.uservehicle.userdata.userdata!
                 .firstWhere((element) => element.pid == '01 2F')
                 .obddata
                 .response);
@@ -224,8 +211,8 @@ class InternalDatabase {
           }
 
           time1 = time2;
-          lat1 = element.uservehicle.userdata.pos.lat;
-          long1 = element.uservehicle.userdata.pos.long;
+          lat1 = element.uservehicle.userdata.pos!.lat;
+          long1 = element.uservehicle.userdata.pos!.long;
           start = Location(lat1, long1);
         }
       }
@@ -273,8 +260,8 @@ class InternalDatabase {
               kmaccarrv.add(0.0);
               farrk.clear();
               farrk.add(0.0);
-              lat1 = element.uservehicle.userdata.pos.lat;
-              long1 = element.uservehicle.userdata.pos.long;
+              lat1 = element.uservehicle.userdata.pos!.lat;
+              long1 = element.uservehicle.userdata.pos!.long;
             });
             await teste2.close();
           }

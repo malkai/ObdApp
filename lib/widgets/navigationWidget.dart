@@ -36,10 +36,10 @@ class _BottonWidgetState extends State<BottonWidget> {
           icon: Icon(Icons.home),
           label: 'Corrida',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.business),
-          label: 'Histórico',
-        ),
+       // BottomNavigationBarItem(
+        //  icon: Icon(Icons.business),
+        //  label: 'Histórico',
+        //),
         BottomNavigationBarItem(
           icon: Icon(Icons.settings),
           label: 'Configuração',

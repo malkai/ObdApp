@@ -56,15 +56,62 @@ class _ConfwidgetState extends State<Confwidget> {
   }
 
   void updateconf() async {
-    confapp = await Hive.openBox<Confdata>('conf');
-    confapp.putAt(0, confdata);
-    confapp.close();
+    var cont = 0;
+
+    if (confdata.acc) {
+      cont++;
+    }
+    if (confdata.obd) {
+      cont++;
+    }
+    if (confdata.gps) {
+      cont++;
+    }
+
+    if (cont==0) {
+
+      _eMyDialog("Necessario ativar uma função: \n GPS, OBD ou Acc");
+
+    } else {
+      confapp = await Hive.openBox<Confdata>('conf');
+
+      confapp.putAt(0, confdata);
+      confapp.close();
+      _showMyDialog();
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
     updateconf();
+  }
+
+  Future<void> _eMyDialog(String erro) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Erro no salvamento'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(erro),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _showMyDialog() async {
@@ -126,7 +173,6 @@ class _ConfwidgetState extends State<Confwidget> {
               color: Colors.white,
             ),
             onPressed: () {
-              _showMyDialog();
               updateconf();
             },
           ),
@@ -134,67 +180,169 @@ class _ConfwidgetState extends State<Confwidget> {
       ),
       body: ListView(
         children: [
-          Container(
-            color: const Color.fromARGB(255, 255, 255, 255),
-            height: 1000,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Container(
-                padding: const EdgeInsets.only(
-                    top: 10, bottom: 10, left: 10, right: 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Container(
+              padding: const EdgeInsets.only(
+                  top: 10, bottom: 10, left: 10, right: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Simulador OBD')),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                          child: TextFormField(
+                            controller: myController,
+                            decoration: const InputDecoration(
+                              border: UnderlineInputBorder(),
+                              labelText: 'Nome',
+                            ),
+                            onChanged: (values) => setState(
+                              () {
+                                confdata.name = myController.text;
+                              },
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                          child: TextFormField(
+                            controller: speed,
+                            decoration: const InputDecoration(
+                              border: UnderlineInputBorder(),
+                              labelText: 'Velocidade de requisição de dados',
+                            ),
+                            onChanged: (values) => setState(
+                              () {
+                                confdata.timereqobd = speed.text;
+                              },
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Ligar accelerometer ')),
+                            Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                              child: Switch(
+                                  value: confdata.acc,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      confdata.acc = value;
+                                    });
+                                  }),
+                            ),
+                          ],
+                        ),
+                        if (confdata.acc)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                  child: const Text('Simulador OBD')),
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text('  Utilizar relógio')),
+                              Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: Switch(
+                                    value: confdata.watch,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        confdata.watch = value;
+                                        confdata.phone = !confdata.phone;
+                                      });
+                                    }),
+                              ),
                             ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                            child: TextFormField(
-                              controller: myController,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                labelText: 'Nome',
-                              ),
-                              onChanged: (values) => setState(
-                                () {
-                                  confdata.name = myController.text;
-                                },
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                            child: TextFormField(
-                              controller: speed,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                labelText: 'Velocidade de requisição de dados',
-                              ),
-                              onChanged: (values) => setState(
-                                () {
-                                  confdata.timereqobd = speed.text;
-                                },
-                              ),
-                            ),
-                          ),
+                        if (confdata.acc)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                  child: const Text('Ligar Simulador ')),
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text('  Utilizar smarthpohne')),
+                              Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: Switch(
+                                    value: confdata.phone,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        confdata.phone = value;
+                                        confdata.watch = !confdata.watch;
+                                      });
+                                    }),
+                              ),
+                            ],
+                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Ligar GPS ')),
+                            Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                              child: Switch(
+                                  value: confdata.gps,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      confdata.gps = value;
+                                    });
+                                  }),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: const Text('Ligar OBD ')),
+                            Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                              child: Switch(
+                                  value: confdata.obd,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      confdata.obd = value;
+                                    });
+                                  }),
+                            ),
+                          ],
+                        ),
+                        if (confdata.obd)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text('  Utilizar Simulador ')),
                               Container(
                                 padding:
                                     const EdgeInsets.fromLTRB(20, 10, 20, 10),
@@ -208,149 +356,148 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ],
                           ),
-                          if (confdata.on)
-                            Column(
-                              children: [
-                                Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 10, 20, 10),
-                                    child: const Text('Velocidade KM/H')),
-                                RangeSlider(
-                                  values: RangeValues(
-                                      confdata.velomin.toDouble(),
-                                      confdata.velomax.toDouble()),
-                                  min: 0,
-                                  max: 200,
-                                  divisions: 200,
-                                  labels: RangeLabels(
-                                    confdata.velomin.round().toString(),
-                                    confdata.velomax.round().toString(),
-                                  ),
-                                  onChanged: (values) => setState(
-                                    () {
-                                      confdata.velomin = values.start.toInt();
-                                      confdata.velomax = values.end.toInt();
-                                    },
-                                  ),
+                        if (confdata.on)
+                          Column(
+                            children: [
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text('Velocidade KM/H')),
+                              RangeSlider(
+                                values: RangeValues(
+                                    confdata.velomin.toDouble(),
+                                    confdata.velomax.toDouble()),
+                                min: 0,
+                                max: 200,
+                                divisions: 200,
+                                labels: RangeLabels(
+                                  confdata.velomin.round().toString(),
+                                  confdata.velomax.round().toString(),
                                 ),
-                                Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 10, 20, 10),
-                                    child: const Text('RPM')),
-                                RangeSlider(
-                                  values: RangeValues(
-                                      confdata.rpmmin.toDouble(),
-                                      confdata.rpmmax.toDouble()),
-                                  min: 750,
-                                  max: 10000,
-                                  divisions: 9350,
-                                  labels: RangeLabels(
-                                    confdata.rpmmin.round().toString(),
-                                    confdata.rpmmax.round().toString(),
-                                  ),
-                                  onChanged: (values) => setState(
-                                    () {
-                                      confdata.rpmmin = values.start;
-                                      confdata.rpmmax = values.end;
-                                    },
-                                  ),
+                                onChanged: (values) => setState(
+                                  () {
+                                    confdata.velomin = values.start.toInt();
+                                    confdata.velomax = values.end.toInt();
+                                  },
                                 ),
-                                Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 10, 20, 10),
-                                    child: const Text(
-                                        'Temperatura do liquido de arrefecimento')),
-                                RangeSlider(
-                                  values: RangeValues(
-                                      confdata.templamin, confdata.templamax),
-                                  min: 90,
-                                  max: 104.4,
-                                  divisions: 104 - 90,
-                                  labels: RangeLabels(
-                                    confdata.templamin.round().toString(),
-                                    confdata.templamax.round().toString(),
-                                  ),
-                                  onChanged: (values) => setState(
-                                    () {
-                                      confdata.templamin = values.start;
-                                      confdata.templamax = values.end;
-                                    },
-                                  ),
+                              ),
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text('RPM')),
+                              RangeSlider(
+                                values: RangeValues(
+                                    confdata.rpmmin.toDouble(),
+                                    confdata.rpmmax.toDouble()),
+                                min: 750,
+                                max: 10000,
+                                divisions: 9350,
+                                labels: RangeLabels(
+                                  confdata.rpmmin.round().toString(),
+                                  confdata.rpmmax.round().toString(),
                                 ),
-                                Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 10, 20, 10),
-                                    child: const Text(
-                                        'Pressão absoluta do coletor de admissão')),
-                                RangeSlider(
-                                  values: RangeValues(
-                                      confdata.pressmin, confdata.pressmax),
-                                  min: 14.7,
-                                  max: 101,
-                                  divisions: 101 - 14,
-                                  labels: RangeLabels(
-                                    confdata.pressmin.round().toString(),
-                                    confdata.pressmax.round().toString(),
-                                  ),
-                                  onChanged: (values) => setState(
-                                    () {
-                                      confdata.pressmin = values.start;
-                                      confdata.pressmax = values.end;
-                                    },
-                                  ),
+                                onChanged: (values) => setState(
+                                  () {
+                                    confdata.rpmmin = values.start;
+                                    confdata.rpmmax = values.end;
+                                  },
                                 ),
-                                Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 10, 20, 10),
-                                    child: const Text(
-                                        'Temperatura do ar de entrada')),
-                                RangeSlider(
-                                  values: RangeValues(
-                                      confdata.tempaemin, confdata.tempaemax),
-                                  min: 30,
-                                  max: 70,
-                                  divisions: 70 - 30,
-                                  labels: RangeLabels(
-                                    confdata.tempaemin.round().toString(),
-                                    confdata.tempaemax.round().toString(),
-                                  ),
-                                  onChanged: (values) => setState(
-                                    () {
-                                      confdata.tempaemin = values.start;
-                                      confdata.tempaemax = values.end;
-                                    },
-                                  ),
+                              ),
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text(
+                                      'Temperatura do liquido de arrefecimento')),
+                              RangeSlider(
+                                values: RangeValues(
+                                    confdata.templamin, confdata.templamax),
+                                min: 90,
+                                max: 104.4,
+                                divisions: 104 - 90,
+                                labels: RangeLabels(
+                                  confdata.templamin.round().toString(),
+                                  confdata.templamax.round().toString(),
                                 ),
-                                Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 10, 20, 10),
-                                    child: const Text('Nivel de combustivel')),
-                                RangeSlider(
-                                  values: RangeValues(
-                                      confdata.percentmin.toDouble(),
-                                      confdata.percentmax.toDouble()),
-                                  min: 0,
-                                  max: 100,
-                                  divisions: 100,
-                                  labels: RangeLabels(
-                                    confdata.percentmin.round().toString(),
-                                    confdata.percentmax.round().toString(),
-                                  ),
-                                  onChanged: (values) => setState(
-                                    () {
-                                      confdata.percentmin =
-                                          values.start.toInt();
-                                      confdata.percentmax = values.end.toInt();
-                                    },
-                                  ),
+                                onChanged: (values) => setState(
+                                  () {
+                                    confdata.templamin = values.start;
+                                    confdata.templamax = values.end;
+                                  },
                                 ),
-                              ],
-                            ),
-                        ],
-                      ),
+                              ),
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text(
+                                      'Pressão absoluta do coletor de admissão')),
+                              RangeSlider(
+                                values: RangeValues(
+                                    confdata.pressmin, confdata.pressmax),
+                                min: 14.7,
+                                max: 101,
+                                divisions: 101 - 14,
+                                labels: RangeLabels(
+                                  confdata.pressmin.round().toString(),
+                                  confdata.pressmax.round().toString(),
+                                ),
+                                onChanged: (values) => setState(
+                                  () {
+                                    confdata.pressmin = values.start;
+                                    confdata.pressmax = values.end;
+                                  },
+                                ),
+                              ),
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text(
+                                      'Temperatura do ar de entrada')),
+                              RangeSlider(
+                                values: RangeValues(
+                                    confdata.tempaemin, confdata.tempaemax),
+                                min: 30,
+                                max: 70,
+                                divisions: 70 - 30,
+                                labels: RangeLabels(
+                                  confdata.tempaemin.round().toString(),
+                                  confdata.tempaemax.round().toString(),
+                                ),
+                                onChanged: (values) => setState(
+                                  () {
+                                    confdata.tempaemin = values.start;
+                                    confdata.tempaemax = values.end;
+                                  },
+                                ),
+                              ),
+                              Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 10, 20, 10),
+                                  child: const Text('Nivel de combustivel')),
+                              RangeSlider(
+                                values: RangeValues(
+                                    confdata.percentmin.toDouble(),
+                                    confdata.percentmax.toDouble()),
+                                min: 0,
+                                max: 100,
+                                divisions: 100,
+                                labels: RangeLabels(
+                                  confdata.percentmin.round().toString(),
+                                  confdata.percentmax.round().toString(),
+                                ),
+                                onChanged: (values) => setState(
+                                  () {
+                                    confdata.percentmin =
+                                        values.start.toInt();
+                                    confdata.percentmax = values.end.toInt();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

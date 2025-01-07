@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 class Textdata extends StatelessWidget {
+  final String? freq;
   final String tipo;
   final String? texto;
   const Textdata({
     super.key,
+    this.freq,
     required this.tipo,
     this.texto,
   });
@@ -16,6 +18,14 @@ class Textdata extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Text(
+            freq ?? 'NULL',
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+                color: Colors.black,
+                decoration: TextDecoration.none),
+          ),
           Text(
             tipo,
             style: const TextStyle(

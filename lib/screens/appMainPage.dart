@@ -22,7 +22,7 @@ class appmain extends StatelessWidget with ChangeNotifier {
           centerTitle: true,
           leading: const AutoLeadingButton(),
         ),
-        routes: const [Ride(), Historyuser(), Configurepage()],
+        routes: const [Ride(), Configurepage()],
         bottomNavigationBuilder: (_, tabsRouter) {
           return BottonWidget(
             tabsRouter: tabsRouter,

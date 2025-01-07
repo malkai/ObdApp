@@ -33,16 +33,21 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
       velomin: fields[2] as int,
       vin: fields[8] as String,
       on: fields[16] as bool,
-      responseobddata: (fields[17] as List).cast<getobddata>(),
-      name: fields[18] as String,
-      timereqobd: fields[19] as String,
-    );
+      responseobddata: (fields[22] as List).cast<getobddata>(),
+      name: fields[23] as String,
+      timereqobd: fields[24] as String,
+    )
+      ..obd = fields[17] as bool
+      ..acc = fields[18] as bool
+      ..watch = fields[19] as bool
+      ..phone = fields[20] as bool
+      ..gps = fields[21] as bool;
   }
 
   @override
   void write(BinaryWriter writer, Confdata obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(24)
       ..writeByte(0)
       ..write(obj.rpmmin)
       ..writeByte(1)
@@ -76,10 +81,20 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
       ..writeByte(16)
       ..write(obj.on)
       ..writeByte(17)
-      ..write(obj.responseobddata)
+      ..write(obj.obd)
       ..writeByte(18)
-      ..write(obj.name)
+      ..write(obj.acc)
       ..writeByte(19)
+      ..write(obj.watch)
+      ..writeByte(20)
+      ..write(obj.phone)
+      ..writeByte(21)
+      ..write(obj.gps)
+      ..writeByte(22)
+      ..write(obj.responseobddata)
+      ..writeByte(23)
+      ..write(obj.name)
+      ..writeByte(24)
       ..write(obj.timereqobd);
   }
 

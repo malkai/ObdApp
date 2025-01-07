@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:obdapp/functions/obdPlugin.dart';
 import 'package:obdapp/screens/pidsDiscovery.dart';
 import 'package:obdapp/screens/getAllPids.dart';
-import 'package:obdapp/screens/getselectPids.dart';
+
 import '../screens/loadingPage.dart';
 import '../screens/OBDdatacollect.dart';
 import '../screens/appMainPage.dart';
@@ -22,10 +22,7 @@ class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
         AutoRoute(path: '/initial', page: Appmain.page, children: [
-          AutoRoute(
-            path: 'history',
-            page: Historyuser.page,
-          ),
+         
           AutoRoute(path: 'ride', page: Ride.page),
           AutoRoute(path: 'conf', page: Configurepage.page),
         ]),
@@ -43,10 +40,7 @@ class AppRouter extends RootStackRouter {
             path: 'getallpids',
             page: Getallpids.page,
           ),
-          AutoRoute(
-            path: 'getselectPids',
-            page: Getselectpids.page,
-          ),
+        
         ]),
       ];
 }

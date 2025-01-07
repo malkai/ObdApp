@@ -42,18 +42,20 @@ class UserDataProcess {
   @HiveField(2)
   String signature;
   @HiveField(3)
-  List<ObdRawData> userdata;
+  List<ObdRawData>? userdata;
   @HiveField(4)
-  UserAcc acc;
+  UserAcc? acc;
   @HiveField(5)
-  PositionClass pos;
+  PositionClass? pos;
   @HiveField(6)
   DateTime time;
 
   Map<dynamic, dynamic> listtoMap() {
     var map = {};
-    for (var element in userdata) {
+    if (userdata != null){
+    for (var element in userdata!) {
       map[element.pid] = {element.obddata.toJson()};
+    }
     }
     return map;
   }
@@ -71,10 +73,10 @@ class UserDataProcess {
     return {
       'isOnline': isOnline.toString(),
       'signature': signature,
-      'userdata': userdata.map((tag) => tag.toJson()).toList(),
+      'userdata': userdata!.map((tag) => tag.toJson()).toList(),
       'time': time.toString(),
-      'acc': acc.toJson(),
-      'pos': pos.toJson(),
+      'acc': acc!.toJson(),
+      'pos': pos?.toJson(),
       'processada': processada.toString(),
     };
   }
@@ -131,6 +133,8 @@ class ObdRawData {
   String pid;
   @HiveField(1)
   ObdData obddata;
+  @HiveField(2)
+  int timer=0;
   ObdRawData({
     required this.pid,
     required this.obddata,

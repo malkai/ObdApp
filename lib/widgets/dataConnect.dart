@@ -25,7 +25,9 @@ import '../functions/InternalDatabase.dart';
 class Data_Connect extends StatefulWidget {
   final ObdPlugin obd2;
 
-  Data_Connect({super.key, required this.obd2});
+  
+
+  Data_Connect({super.key, required this.obd2,});
   static _ConnectState of(BuildContext context) =>
       context.findAncestorStateOfType()!;
 
@@ -34,22 +36,29 @@ class Data_Connect extends StatefulWidget {
 }
 
 class _ConnectState extends State<Data_Connect> {
-  final String _platformVersion = 'Unknown';
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   List data = [];
   List<ObdRawData> _responses = [];
   List<Userdata> savejson = [];
-  double heigh1 = 400;
   ObdData vin = ObdData(response: '', title: '', unit: '');
+  MainAxisAlignment aligm = MainAxisAlignment.center;
+
+  PositionClass? pc;
 
   bool teste = true;
   List<LatLng> points = [];
+  Timer t = Timer(Duration(seconds: 0), () {});
 
-  UserAccelerometerEvent? _userAccelEvt;
+  final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  UserAccelerometerEvent? _userAccelerometerEvent;
+  Duration sensorInterval = SensorInterval.normalInterval;
+  DateTime? _userAccelerometerUpdateTime;
+  int? _userAccelerometerLastInterval;
+  static const Duration _ignoreDuration = Duration(milliseconds: 20);
+  UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
 
-  bool _gpsServiceEnabled = false;
+  String? uniqueid;
 
-  LocationPermission? _permission;
   static Position? _position;
   late GeoPoint lastPosition;
   bool isLastPositionInitialized = false;
@@ -64,53 +73,17 @@ class _ConnectState extends State<Data_Connect> {
     accuracy: LocationAccuracy.high,
     distanceFilter: 0,
   );
-  late StreamSubscription<Position> _positionStream;
+  StreamSubscription<Position>? _positionStream;
 
   void updatemap() {
     setState(() {
       points;
     });
-    print(points.length);
   }
 
   double roundDouble(double value, int places) {
     num mod = pow(10.0, places);
     return ((value * mod).round().toDouble() / mod);
-  }
-
-  Future<Position> _determinePosition() async {
-    // Test if location services are enabled.
-    _gpsServiceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!_gpsServiceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    _permission ??= await Geolocator.checkPermission();
-
-    if (_permission == LocationPermission.denied) {
-      _permission = await Geolocator.requestPermission();
-      if (_permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (_permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
   }
 
   Future<bool> checkUserConnection() async {
@@ -161,41 +134,75 @@ class _ConnectState extends State<Data_Connect> {
             },
   */
 
+  void getGps(var pc) {
+    if (_position != null) {
+      GeoPoint actualPosition =
+          GeoPoint(_position!.latitude, _position!.longitude);
+      PositionClass pc =
+          PositionClass(lat: _position!.latitude, long: _position!.longitude);
+      pc.lat = roundDouble(actualPosition.latitude, 4);
+      pc.long = roundDouble(actualPosition.longitude, 4);
+      LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
+          roundDouble(actualPosition.longitude, 4));
+
+      if (points.length > 1 && points.length < 2) {
+        var distance = Distance();
+        //create a new distance calculator with Haversine algorithm
+        distance = const Distance(calculator: Haversine());
+
+        //create coordinates with NaN or Infinity state to check if the distance is calculated correctly
+        final point1 = aux;
+        final point2 = points[0];
+
+        var meterDistance = distance.as(LengthUnit.Meter, point1, point2);
+
+        if (meterDistance < 55.00) {
+          points.add(aux);
+        } else {
+          points[0] = aux;
+        }
+      } else {
+        points.add(aux);
+      }
+    }
+  }
+
+  void accuser(String x, y, z, unit) {
+    if (_userAccelerometerEvent != null) {
+      Map accel = {};
+      accel['x'] = _userAccelerometerEvent?.x.toStringAsFixed(3);
+      accel['y'] = _userAccelerometerEvent?.y.toStringAsFixed(3);
+      accel['z'] = _userAccelerometerEvent?.z.toStringAsFixed(3);
+      accel['unit'] = 'm/s^2';
+      x = accel['x'];
+      y = accel['y'];
+      z = accel['z'];
+      unit = accel['unit'];
+    }
+  }
+
   void simuobdtime() {
     Timer.periodic(Duration(seconds: int.parse(confdata!.timereqobd)),
         (timer) async {
       _timer = timer;
 
-      if (_position != null) {
-        GeoPoint actualPosition =
-            GeoPoint(_position!.latitude, _position!.longitude);
-        PositionClass pc =
-            PositionClass(lat: _position!.latitude, long: _position!.longitude);
-        pc.lat = roundDouble(actualPosition.latitude, 4);
-        pc.long = roundDouble(actualPosition.longitude, 4);
-        LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
-            roundDouble(actualPosition.longitude, 4));
+      print(confdata!.gps);
+      print(confdata!.obd);
 
-        if (points.length > 1 && points.length < 2) {
-          var distance = Distance();
-          //create a new distance calculator with Haversine algorithm
-          distance = const Distance(calculator: Haversine());
+      if (confdata!.gps) {
+        print("oi");
+        getGps(pc);
+        updatemap();
+        setState(() {
+          points;
+        });
+      }
 
-          //create coordinates with NaN or Infinity state to check if the distance is calculated correctly
-          final point1 = aux;
-          final point2 = points[0];
+      if (confdata!.acc) {
+        accuser(acc.x, acc.y, acc.z, acc.unit);
+      }
 
-          var meterDistance = distance.as(LengthUnit.Meter, point1, point2);
-
-          if (meterDistance < 55.00) {
-            points.add(aux);
-          } else {
-            points[0] = aux;
-          }
-        } else {
-          points.add(aux);
-        }
-
+      if (confdata!.obd) {
         Random random = Random();
         List<ObdRawData> responses1 = [];
         ObdData help2 = ObdData(
@@ -228,11 +235,6 @@ class _ConnectState extends State<Data_Connect> {
         responses1.add(help1);
 
         // print(widget.points.length);
-        updatemap();
-        setState(() {
-          points;
-          _responses = responses1;
-        });
 
         help2 = ObdData(
             unit: "\u00b0C",
@@ -278,34 +280,87 @@ class _ConnectState extends State<Data_Connect> {
         help1 = ObdRawData(pid: '01 0C', obddata: help2);
         responses1.add(help1);
 
-        String? uniqueid;
+        setState(() {
+          _responses = responses1;
+        });
+      }
+      bool a = await checkUserConnection();
 
-        if (Platform.isIOS) {
-          var iosDeviceInfo = await deviceInfo.iosInfo;
-          uniqueid = iosDeviceInfo.identifierForVendor;
-        } else if (Platform.isAndroid) {
-          var androidDeviceInfo = await deviceInfo.androidInfo;
-          uniqueid = androidDeviceInfo.id;
+      UserDataProcess save = UserDataProcess(
+          processada: false,
+          isOnline: false,
+          signature: '',
+          userdata: _responses,
+          acc: acc,
+          pos: pc,
+          time: DateTime.now());
+      var signature = await sign(save).then((signature) => signature);
+      save.signature = signature.toString();
+      UserVehicleRaw vehicledata =
+          UserVehicleRaw(userdata: save, vin: vin.response);
+
+      Userdata tobesaved = Userdata(name: uniqueid!, uservehicle: vehicledata);
+      savejson.add(tobesaved);
+
+      var userd = tobesaved.toJson();
+      data.add(userd);
+      if (save.isOnline) {
+        //Repository.add(tobesaved);
+        //  bancoInterno.insertObdData(tobesaved);
+      } else {
+        //  bancoInterno.insertObdData(tobesaved);
+      }
+
+      await Future.delayed(
+        Duration(seconds: int.parse(confdata!.timereqobd)),
+      );
+    });
+  }
+
+  void obdinfo() async {
+    if (!(await widget.obd2.isListenToDataInitialed)) {
+      widget.obd2.setOnDataReceived((command, response, requestCode) async {
+        if (confdata!.gps) {
+          getGps(pc);
+          updatemap;
         }
-        UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
 
-        if (_userAccelEvt != null) {
-          Map accel = {};
-          accel['x'] = _userAccelEvt?.x.toString();
-          accel['y'] = _userAccelEvt?.y.toString();
-          accel['z'] = _userAccelEvt?.z.toString();
-          accel['unit'] = 'm/s^2';
-          acc.x = accel['x'];
-          acc.y = accel['y'];
-          acc.z = accel['z'];
-          acc.unit = accel['unit'];
+        List resps = jsonDecode(response);
+        List<ObdRawData> responses1 = [];
+        ObdData vin2 = ObdData(unit: '', title: '', response: '');
+
+        if (resps.isNotEmpty) {
+          for (var reading in resps) {
+            if (reading['PID'] == '09 02 5') {
+              vin2.unit = reading['description'];
+              vin2.title = reading['title'];
+              vin2.response = reading['response'];
+              vin = vin2;
+            } else {
+              ObdData help2 = ObdData(
+                  unit: reading['unit'],
+                  title: reading['title'],
+                  response: reading['response']);
+              ObdRawData help1 =
+                  ObdRawData(pid: reading['PID'], obddata: help2);
+
+              responses1.add(help1);
+            }
+          }
         }
+        _responses.clear;
+        setState(() {
+          _responses = responses1;
+        });
 
+        if (confdata!.acc) {
+          accuser(acc.x, acc.y, acc.z, acc.unit);
+        }
         bool a = await checkUserConnection();
 
         UserDataProcess save = UserDataProcess(
             processada: false,
-            isOnline: false,
+            isOnline: a,
             signature: '',
             userdata: _responses,
             acc: acc,
@@ -314,26 +369,111 @@ class _ConnectState extends State<Data_Connect> {
         var signature = await sign(save).then((signature) => signature);
         save.signature = signature.toString();
         UserVehicleRaw vehicledata =
-            UserVehicleRaw(userdata: save, vin: vin.response);
+            UserVehicleRaw(userdata: save, vin: confdata!.name);
+        if (vin.response != '') {
+          vehicledata = UserVehicleRaw(userdata: save, vin: vin.response);
+        }
 
         Userdata tobesaved =
             Userdata(name: uniqueid!, uservehicle: vehicledata);
         savejson.add(tobesaved);
-
         var userd = tobesaved.toJson();
         data.add(userd);
+
         if (save.isOnline) {
           //Repository.add(tobesaved);
-          bancoInterno.insertObdData(tobesaved);
+          //bancoInterno.insertObdData(tobesaved);
         } else {
-          bancoInterno.insertObdData(tobesaved);
+          //bancoInterno.insertObdData(tobesaved);
         }
+      });
+    }
 
-        await Future.delayed(
-          Duration(seconds: int.parse(confdata!.timereqobd)),
-        );
+    /*
+
+    var requeridResponse = [
+      {
+        "PID": "01 00",
+        "length": 4,
+        "title": "PIDs supported [01 - 20]",
+        "unit": "",
+        "description": "<bit>",
+        "status": true
+      },
+      {
+        "PID": "01 20",
+        "length": 4,
+        "title": "PIDs supported [21 - 40]",
+        "unit": "",
+        "description": "<bit>",
+        "status": true
+      },
+      {
+        "PID": "01 40",
+        "length": 4,
+        "title": "PIDs supported [41 - 60]",
+        "unit": "",
+        "description": "<bit>",
+        "status": true
+      },
+      {
+        "PID": "01 60",
+        "length": 4,
+        "title": "PIDs supported [61 - 80]",
+        "unit": "",
+        "description": "<bit>",
+        "status": true
+      },
+      {
+        "PID": "01 80",
+        "length": 4,
+        "title": "PIDs supported [81  - A0]",
+        "unit": "",
+        "description": "<bit>",
+        "status": true
+      },
+      {
+        "PID": "01 A0",
+        "length": 4,
+        "title": "PIDs supported [A1  - C0]",
+        "unit": "",
+        "description": "<bit>",
+        "status": true
+      },
+    ];
+    int j = 1;
+
+    int count = 0;
+
+    for (var i in requeridResponse) {
+      checkpis(i);
+
+      while (_responses.length < j) {
+        t = Timer(Duration(seconds: 1), () {
+          count += 1;
+          print(count);
+        });
       }
-    });
+
+      _responses[j - 1].timer = count;
+      j++;
+      count = 0;
+    }
+    */
+    await sendrequestOBDData();
+
+    //setState(() {
+    // _responses;
+    //});
+  }
+
+  void checkpis(var ui) async {
+    String jsonString = json.encode([ui]);
+
+    if (widget.obd2.connection?.isConnected != false &&
+        widget.obd2.connection?.isConnected != null) {
+      await widget.obd2.getParamsFromJSON(jsonString);
+    }
   }
 
   Future<void> sendrequestOBDData() async {
@@ -347,33 +487,7 @@ class _ConnectState extends State<Data_Connect> {
             Duration(
               seconds: await widget.obd2.getParamsFromJSON('''
         [        
-            {
-                "PID": "01 0C",
-                "length": 2,
-                "title": "rotacao",
-                "unit": "RPM",
-                "description": "<double>, (( [0] * 256) + [1] ) / 4",
-                "status": true
-            },
-            {
-                "PID": "01 0D",
-                "length": 1, 
-                "title": "velocidade",
-                "unit": "Km/h",
-                "description": "<int>, [0]",
-                "status": true
-            },
-            
-            {
-                "PID": "09 02",
-                "length": 17,
-                "title": "VIN",
-                "unit": "",
-                "description": "<String>",
-                "status": true
-            },
            
-            
             {
                 "PID": "01 2F",
                 "length": 1,
@@ -393,129 +507,6 @@ class _ConnectState extends State<Data_Connect> {
     );
   }
 
-  void obdinfo() async {
-    if (!(await widget.obd2.isListenToDataInitialed)) {
-      widget.obd2.setOnDataReceived((command, response, requestCode) async {
-        if (_position != null) {
-          GeoPoint actualPosition =
-              GeoPoint(_position!.latitude, _position!.longitude);
-          PositionClass pc = PositionClass(
-              lat: _position!.latitude, long: _position!.longitude);
-          PositionClass pc2 = PositionClass(
-              lat: _position!.latitude, long: _position!.longitude);
-          pc2 = pc;
-
-          pc.lat = roundDouble(actualPosition.latitude, 4);
-          pc.long = roundDouble(actualPosition.longitude, 4);
-          LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
-              roundDouble(actualPosition.longitude, 4));
-
-          if (points.length > 1 && points.length < 2) {
-            var distance = Distance();
-            //create a new distance calculator with Haversine algorithm
-            distance = const Distance(calculator: Haversine());
-
-            //create coordinates with NaN or Infinity state to check if the distance is calculated correctly
-            final point1 = aux;
-            final point2 = points[0];
-
-            var meterDistance = distance.as(LengthUnit.Meter, point1, point2);
-
-            if (meterDistance < 55.00) {
-              points.add(aux);
-            } else {
-              points[0] = aux;
-            }
-          } else {
-            points.add(aux);
-          }
-          updatemap;
-          List resps = jsonDecode(response);
-          List<ObdRawData> responses1 = [];
-          ObdData vin2 = ObdData(unit: '', title: '', response: '');
-
-          if (resps.isNotEmpty) {
-            for (var reading in resps) {
-              if (reading['PID'] == '09 02 5') {
-                vin2.unit = reading['description'];
-                vin2.title = reading['title'];
-                vin2.response = reading['response'];
-                vin = vin2;
-              } else {
-                ObdData help2 = ObdData(
-                    unit: reading['unit'],
-                    title: reading['title'],
-                    response: reading['response']);
-                ObdRawData help1 =
-                    ObdRawData(pid: reading['PID'], obddata: help2);
-
-                responses1.add(help1);
-              }
-            }
-          }
-          _responses.clear;
-          setState(() {
-            _responses = responses1;
-          });
-          String? uniqueid;
-
-          if (Platform.isIOS) {
-            var iosDeviceInfo = await deviceInfo.iosInfo;
-            uniqueid = iosDeviceInfo.identifierForVendor;
-          } else if (Platform.isAndroid) {
-            var androidDeviceInfo = await deviceInfo.androidInfo;
-            uniqueid = androidDeviceInfo.id;
-          }
-          UserAcc acc = UserAcc(x: '', y: '', z: '', unit: '');
-
-          if (_userAccelEvt != null) {
-            Map accel = {};
-            accel['x'] = _userAccelEvt?.x.toString();
-            accel['y'] = _userAccelEvt?.y.toString();
-            accel['z'] = _userAccelEvt?.z.toString();
-            accel['unit'] = 'm/s^2';
-            acc.x = accel['x'];
-            acc.y = accel['y'];
-            acc.z = accel['z'];
-            acc.unit = accel['unit'];
-          }
-
-          bool a = await checkUserConnection();
-
-          UserDataProcess save = UserDataProcess(
-              processada: false,
-              isOnline: a,
-              signature: '',
-              userdata: _responses,
-              acc: acc,
-              pos: pc,
-              time: DateTime.now());
-          var signature = await sign(save).then((signature) => signature);
-          save.signature = signature.toString();
-          UserVehicleRaw vehicledata =
-              UserVehicleRaw(userdata: save, vin: confdata!.name);
-          if (vin.response != '') {
-            vehicledata = UserVehicleRaw(userdata: save, vin: vin.response);
-          }
-
-          Userdata tobesaved =
-              Userdata(name: uniqueid!, uservehicle: vehicledata);
-          savejson.add(tobesaved);
-          var userd = tobesaved.toJson();
-          data.add(userd);
-
-          if (save.isOnline) {
-            //Repository.add(tobesaved);
-            bancoInterno.insertObdData(tobesaved);
-          } else {
-            bancoInterno.insertObdData(tobesaved);
-          }
-        }
-      });
-      await sendrequestOBDData();
-    }
-  }
-
   void getinfo() async {
     final diretorioUsuario = await path_prov.getApplicationDocumentsDirectory();
 
@@ -523,20 +514,33 @@ class _ConnectState extends State<Data_Connect> {
         File(diretorioUsuario.path + "/" + DateTime.now().toString() + '.json');
     String terre = "${diretorioUsuario.path}/${DateTime.now()}";
     file.create();
-    int ui = 0;
 
-    if (confdata!.on == true) {
-      simuobdtime();
+    print(confdata!.obd);
+
+    if (confdata!.obd) {
+      if (confdata!.on) {
+        print("oi1");
+        simuobdtime();
+      } else {
+        print("oi2");
+        obdinfo();
+      }
     } else {
-      obdinfo();
+      print("oi3");
+      simuobdtime();
     }
-
-    ui++;
   }
 
   Future<void> init() async {
+    if (Platform.isIOS) {
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      uniqueid = iosDeviceInfo.identifierForVendor;
+    } else if (Platform.isAndroid) {
+      var androidDeviceInfo = await deviceInfo.androidInfo;
+      uniqueid = androidDeviceInfo.id;
+    }
     confapp = await Hive.openBox<Confdata>('conf');
-    print(confapp!.values.length);
+
     if (confapp == null) {
       var bancoInterno = InternalDatabase();
       bancoInterno.init();
@@ -568,30 +572,72 @@ class _ConnectState extends State<Data_Connect> {
         confdata;
       });
     }
-  }
 
-  void saveData() async {
-    //bool fileExists = true;
+    var countWidget = 0;
 
-    //DateTime.now();
+    if (confdata!.acc) {
+      countWidget++;
+    }
+    if (confdata!.obd) {
+      countWidget++;
+    }
+    if (confdata!.gps) {
+      countWidget++;
+    }
+    if (countWidget > 3) {
+      setState(() {
+        aligm = MainAxisAlignment.end;
+      });
+    }
   }
 
   @override
   void initState() {
     super.initState();
     init().then((value) {
-      userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-        _userAccelEvt = event;
-      });
+      if (confdata!.acc) {
+        _streamSubscriptions.add(
+          userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
+            (UserAccelerometerEvent event) {
+              final now = event.timestamp;
+              setState(() {
+                _userAccelerometerEvent = event;
+                if (_userAccelerometerUpdateTime != null) {
+                  final interval =
+                      now.difference(_userAccelerometerUpdateTime!);
+                  if (interval > _ignoreDuration) {
+                    _userAccelerometerLastInterval = interval.inMilliseconds;
+                  }
+                }
+              });
+              _userAccelerometerUpdateTime = now;
+            },
+            onError: (e) {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text("Sensor Not Found"),
+                      content: Text(
+                          "It seems that your device doesn't support User Accelerometer Sensor"),
+                    );
+                  });
+            },
+            cancelOnError: true,
+          ),
+        );
+      }
 
-      _positionStream =
-          Geolocator.getPositionStream(locationSettings: _locationSettings)
-              .listen((Position? position) {
-        print(position == null
-            ? 'Unknown'
-            : '${position.latitude.toString()}, ${position.longitude.toString()}');
-        _position = position;
-      });
+      if (confdata!.gps) {
+        _positionStream =
+            Geolocator.getPositionStream(locationSettings: _locationSettings)
+                .listen((Position? position) {
+          print(position == null
+              ? 'Unknown'
+              : '${position.latitude.toString()}, ${position.longitude.toString()}');
+          _position = position;
+        });
+      }
 
       getinfo();
     });
@@ -600,8 +646,14 @@ class _ConnectState extends State<Data_Connect> {
   @override
   void dispose() async {
     super.dispose();
+    for (final subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
 
-    _timer!.cancel();
+    if (await widget.obd2.hasConnection) {
+      await widget.obd2.connection!.close();
+    }
+
     final diretorioUsuario = await path_prov.getExternalStorageDirectory();
 
     File file = File(
@@ -612,8 +664,18 @@ class _ConnectState extends State<Data_Connect> {
 
     final String jsonString = encoder.convert(data);
     file.writeAsStringSync(jsonString);
-    _positionStream.cancel();
+    if (_positionStream != null) {
+      _positionStream!.cancel();
+    }
     points.clear();
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+
+    await widget.obd2.connection?.close();
+    await widget.obd2.connection?.finish();
+    widget.obd2.connection?.dispose();
+    t.cancel();
   }
 
   @override
@@ -623,57 +685,74 @@ class _ConnectState extends State<Data_Connect> {
         color: Color.fromARGB(255, 255, 255, 255),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: aligm,
         children: [
-          Container(
-              padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+          if (confdata?.acc ?? false)
+            Container(
+                padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: Accxyz(
+                    x: _userAccelerometerEvent?.x.toStringAsFixed(3) ?? "?",
+                    y: _userAccelerometerEvent?.y.toStringAsFixed(3) ?? "?",
+                    z: _userAccelerometerEvent?.z.toStringAsFixed(3) ?? "?")),
+          SizedBox(height: 10),
+          if (confdata?.gps ?? false)
+            Builder(builder: (BuildContext context) {
+              return Container(height: 300, child: MapWidget(points: points));
+            }),
+          SizedBox(height: 10),
+          if (confdata?.obd ?? false)
+            Container(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            
               decoration: const BoxDecoration(
                 color: Colors.white,
               ),
-              child: Accxyz()),
-          SizedBox(height: 10),
-          Builder(builder: (BuildContext context) {
-            return Container(height: 300, child: MapWidget(points: points));
-          }),
-          SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-            height: 300,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+              child: Center(
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Column(
+                        children: [
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          //   children: [
+                          //      Text("Frequência"),
+                          //     Text("Title"),
+                          //    Text("Valor"),
+                          //   ],
+                          // ),
+                          Textdata(
+                            freq: "1",
+                            tipo: 'VIN',
+                            texto: vin.response == '' ? 'VIN' : vin.response,
+                          ),
+                          ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: _responses.length,
+                            itemBuilder: (context, i) {
+                              return Column(
+                                children: [
+                                  Textdata(
+                                    freq: "1",
+
+                                    // print([i.pid, i.obddata.unit]);
+                                    tipo: _responses[i].obddata.title == ''
+                                        ? 'PID $i'
+                                        : _responses[i].obddata.title,
+                                    texto: _responses[i].obddata.unit == ''
+                                        ? 'PID $i'
+                                        : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ))),
             ),
-            child: Center(
-                child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      children: [
-                        Textdata(
-                          tipo: 'PID VIN',
-                          texto: vin.response == '' ? 'PID VIN' : vin.response,
-                        ),
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: _responses.length,
-                          itemBuilder: (context, i) {
-                            return Column(
-                              children: [
-                                Textdata(
-                                  // print([i.pid, i.obddata.unit]);
-                                  tipo: _responses[i].obddata.title == ''
-                                      ? 'PID $i'
-                                      : _responses[i].obddata.title,
-                                  texto: _responses[i].obddata.unit == ''
-                                      ? 'PID $i'
-                                      : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ))),
-          ),
         ],
       ),
     );
