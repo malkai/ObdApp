@@ -106,8 +106,8 @@ class _FloatState extends State<InitBluetooth> {
   }
 
   Future<void> insetpid(int index) async {
-    var element = pidsDisc(
-        pid: pid.text, title: title.text, lenght: int.parse(length.text));
+    var element = pidsDisc(pid: pid.text, title: title.text);
+    element.unit = length.text;
     element.description = description.text;
 
     pidDisc = await Hive.openBox<pidsDisc>('pidsDisc');
@@ -159,10 +159,6 @@ class _FloatState extends State<InitBluetooth> {
                   t.text == "" &&
                   d.text == "") {
                 showerror("Um dos campos está vazio");
-              } else if (int.tryParse(p.text) == null) {
-                showerror("Erro no Pid");
-              } else if (int.tryParse(l.text) == null) {
-                showerror("Erro no length");
               } else {
                 await insetpid(index).then((onValue) {
                   pid.text = "";
@@ -193,7 +189,7 @@ class _FloatState extends State<InitBluetooth> {
                 controller: l,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'length',
+                  labelText: 'unit',
                 ),
               ),
               SizedBox(height: 10),
@@ -241,17 +237,31 @@ class _FloatState extends State<InitBluetooth> {
                     height: 50,
                     child: TextButton(
                       onPressed: () {
-                        
                         obd2plugin.getConnection(devices[index],
                             (connection) async {
                           // if (!conn2) {
 
                           change_flag();
-                          context.router.popAndPush(Obddata(obd2: obd2));
+                          int indexr = 0;
+                          int count = 0;
 
+                          for (int i = 0; i < getresponse.length; i++) {
+                            if (getresponse[i].ativo) {
+                              count++;
+                              indexr = i;
+                            }
+                          }
+                          if (count == 0) {
+                            showerror("Selecione um PID");
+                          }
+                          if (count > 1) {
+                            showerror("Só pode ser enviado um comando por vez");
+                          } else {
+                            context.router
+                                .popAndPush(Obddata(obd2: obd2, value: indexr));
+                          }
                           //}
                         }, (message) {
-                         
                           showerror("Não é possível conectar-se");
                         });
 
@@ -295,19 +305,34 @@ class _FloatState extends State<InitBluetooth> {
             ),
             onPressed: () async {
               init();
+              int indexr = 0;
+              int count = 0;
 
-              if (confdata.on || !confdata.obd) {
-                context.router.push(Obddata(obd2: obd2));
-              } else {
-                if (!(await obd2.isBluetoothEnable)) {
-                  await obd2.enableBluetooth;
+              for (int i = 0; i < getresponse.length; i++) {
+                if (getresponse[i].ativo) {
+                  count++;
+                  indexr = i;
                 }
-                //_bluetooth.startDiscovery();
+              }
+              if (count == 0) {
+                showerror("Selecione um PID");
+              }
+              if (count > 1) {
+                showerror("Só pode ser enviado um comando por vez");
+              } else if (count == 1) {
+                if (confdata.on || !confdata.obd) {
+                  context.router.push(Obddata(obd2: obd2, value: indexr));
+                } else {
+                  if (!(await obd2.isBluetoothEnable)) {
+                    await obd2.enableBluetooth;
+                  }
+                  //_bluetooth.startDiscovery();
 
-                turnOBD_OFF();
+                  turnOBD_OFF();
 
-                showBluetoothList(context, obd2);
-                //obd2 = ObdPlugin();
+                  showBluetoothList(context, obd2);
+                  //obd2 = ObdPlugin();
+                }
               }
             },
           )
@@ -403,13 +428,11 @@ class _FloatState extends State<InitBluetooth> {
                                       ),
                                       onPressed: () {
                                         pid.text = getresponse[index].pid;
-                                        length.text = getresponse[index]
-                                            .lenght
-                                            .toString();
+                                        length.text =getresponse[index].unit;
                                         title.text = getresponse[index].title;
                                         description.text =
                                             getresponse[index].description;
-                                        openedit(pid, length, title,
+                                        openedit(pid,  length, title,
                                             description, index);
                                       },
                                     ),

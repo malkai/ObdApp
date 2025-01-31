@@ -36,6 +36,16 @@ class _getallpidsState extends State<getallpids> {
   var obd2 = ObdPlugin();
   String pidAll = 'Buscar';
 
+  void turnOBD_OFF() async {
+    setState(() {
+      obd2.connection?.close();
+      obd2.connection?.finish();
+      obd2.connection?.dispose();
+      obd2.disconnect();
+    });
+    obd2 = ObdPlugin();
+  }
+
   List pid01 = [
     "01",
     "02",
@@ -271,21 +281,22 @@ class _getallpidsState extends State<getallpids> {
     await pidAvaliable?.close();
   }
 
-  void checkpis(var ui) async {
+  Future<void> checkpis(var ui) async {
     String jsonString = json.encode([ui]);
 
     if (obd2.connection?.isConnected != false &&
         obd2.connection?.isConnected != null) {
-      await obd2.getParamsFromJSON(jsonString);
+      await Future.delayed(
+          Duration(milliseconds: await obd2.getParamsFromJSON(jsonString)),
+          () {print("done");});
     }
-
-    
   }
 
   @pragma('vm:entry-point')
   void obdinfo() async {
     if (!(await obd2.isListenToDataInitialed)) {
       obd2.setOnDataReceived((command, response, requestCode) async {
+        print(response);
         List resps = jsonDecode(response);
 
         if (resps.isNotEmpty) {
@@ -384,9 +395,25 @@ class _getallpidsState extends State<getallpids> {
         setState(() {
           responses;
         });
-      
       });
 
+      /*
+
+      if (await obd2.hasConnection) {
+        setState(() {
+          obd2.connection?.close();
+          obd2.connection?.finish();
+          obd2.connection?.dispose();
+          obd2.disconnect();
+        });
+        obd2 = ObdPlugin();
+      }
+      */
+      //print("oi2");
+      // await checkpis(requeridResponse[0]);
+      //for (var ui in requeridResponse) {
+      //  print("oi1");
+      //}
       var requeridResponse = [
         {
           "PID": "01 00",
@@ -438,18 +465,26 @@ class _getallpidsState extends State<getallpids> {
         },
       ];
 
+      for (var i in requeridResponse) {
+        await checkpis(i);
+        await Future.delayed(Duration(seconds: 10));
+      }
+
+/*
       int j = 1;
 
       int count = 0;
 
+
+
       for (var i in requeridResponse) {
-        checkpis(i);
+        
 
         while (responses.length < j) {
           await Future.delayed(
-            Duration(seconds: 1),
+            Duration(seconds: 5),
           );
-          count += 1;
+          count += 5;
           print(count);
         }
         print("oi");
@@ -458,20 +493,12 @@ class _getallpidsState extends State<getallpids> {
         count = 0;
       }
 
+*/
       insetpid(responses);
 
       setState(() {
         responses;
       });
-
-      if (await obd2.hasConnection) {
-        await obd2.connection!.close();
-      }
-      //print("oi2");
-      // await checkpis(requeridResponse[0]);
-      //for (var ui in requeridResponse) {
-      //  print("oi1");
-      //}
     }
   }
 
@@ -502,17 +529,17 @@ class _getallpidsState extends State<getallpids> {
                       onPressed: () {
                         obd2plugin.getConnection(devices[index],
                             (connection) async {
-                          bool conn =  obd2.connection!.isConnected;
-                          if (conn) {
+                          print("connected to bluetooth device.");
+                          try {
                             context.router
                                 .popUntilRouteWithName(Pidsdiscovery.name);
-                                  getinfo();
+                            getinfo();
+                          } catch (e) {
+                            print(e);
                           }
                         }, (message) {
-                          print(message);
+                          print("error in connecting: $message");
                         });
-
-                        //Navigator.pop(context, aux);
                       },
                       child: Center(
                         child: Text(devices[index].name.toString()),
@@ -633,10 +660,11 @@ class _getallpidsState extends State<getallpids> {
                 color: Colors.white,
               ),
               onPressed: () async {
-                obd2 = ObdPlugin();
                 if (!(await obd2.isBluetoothEnable)) {
                   await obd2.enableBluetooth;
                 }
+
+                turnOBD_OFF();
 
                 setState(() {
                   pid01r.clear();
@@ -672,8 +700,6 @@ class _getallpidsState extends State<getallpids> {
                         children: [
                           Text(" " + responses[index].obddata.title),
                           SizedBox(width: 10),
-                          Text(" Tempo de Respsota " +
-                              responses[index].timer.toString()),
                         ],
                       ),
                       if (responses[index].obddata.codesvalues.isNotEmpty)

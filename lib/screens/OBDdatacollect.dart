@@ -10,8 +10,9 @@ import '../widgets/dataConnect.dart';
 @RoutePage()
 class obddata extends StatelessWidget {
   final ObdPlugin obd2;
+  final int value;
 
-  const obddata({super.key, required this.obd2});
+  const obddata({super.key, required this.obd2,  required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,7 @@ class obddata extends StatelessWidget {
         ),
         body: Data_Connect(
           obd2: obd2,
+          value: value,
         ),
       ),
     );

@@ -10,7 +10,7 @@ class pidsDisc {
   @HiveField(1)
   String title;
   @HiveField(2)
-  int lenght;
+  int lenght = 1;
   @HiveField(3)
   String unit = "";
   @HiveField(4)
@@ -22,8 +22,7 @@ class pidsDisc {
 
   pidsDisc({
     required this.pid,
-    required this.title,
-    required this.lenght,
+    required this.title
   });
 
   Map<String, dynamic> toJson() {

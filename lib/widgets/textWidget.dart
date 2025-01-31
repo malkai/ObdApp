@@ -18,14 +18,7 @@ class Textdata extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            freq ?? 'NULL',
-            style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 10,
-                color: Colors.black,
-                decoration: TextDecoration.none),
-          ),
+        
           Text(
             tipo,
             style: const TextStyle(

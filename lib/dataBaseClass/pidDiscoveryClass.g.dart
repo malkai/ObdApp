@@ -19,8 +19,8 @@ class pidsDiscAdapter extends TypeAdapter<pidsDisc> {
     return pidsDisc(
       pid: fields[0] as String,
       title: fields[1] as String,
-      lenght: fields[2] as int,
     )
+      ..lenght = fields[2] as int
       ..unit = fields[3] as String
       ..description = fields[4] as String
       ..status = fields[5] as bool

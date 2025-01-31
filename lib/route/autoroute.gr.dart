@@ -125,12 +125,14 @@ class Obddata extends PageRouteInfo<ObddataArgs> {
   Obddata({
     Key? key,
     required ObdPlugin obd2,
+    required int value,
     List<PageRouteInfo>? children,
   }) : super(
           Obddata.name,
           args: ObddataArgs(
             key: key,
             obd2: obd2,
+            value: value,
           ),
           initialChildren: children,
         );
@@ -144,6 +146,7 @@ class Obddata extends PageRouteInfo<ObddataArgs> {
       return obddata(
         key: args.key,
         obd2: args.obd2,
+        value: args.value,
       );
     },
   );
@@ -153,15 +156,18 @@ class ObddataArgs {
   const ObddataArgs({
     this.key,
     required this.obd2,
+    required this.value,
   });
 
   final Key? key;
 
   final ObdPlugin obd2;
 
+  final int value;
+
   @override
   String toString() {
-    return 'ObddataArgs{key: $key, obd2: $obd2}';
+    return 'ObddataArgs{key: $key, obd2: $obd2, value: $value}';
   }
 }
 

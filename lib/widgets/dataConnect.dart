@@ -12,6 +12,7 @@ import 'package:obdapp/widgets/acc.dart';
 
 import '../dataBaseClass/confSimu.dart';
 
+import '../dataBaseClass/pidDiscoveryClass.dart';
 import '../functions/obdPlugin.dart';
 import 'textWidget.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -25,9 +26,13 @@ import '../functions/InternalDatabase.dart';
 class Data_Connect extends StatefulWidget {
   final ObdPlugin obd2;
 
-  
+  final int value;
 
-  Data_Connect({super.key, required this.obd2,});
+  Data_Connect({
+    super.key,
+    required this.value,
+    required this.obd2,
+  });
   static _ConnectState of(BuildContext context) =>
       context.findAncestorStateOfType()!;
 
@@ -48,6 +53,7 @@ class _ConnectState extends State<Data_Connect> {
   bool teste = true;
   List<LatLng> points = [];
   Timer t = Timer(Duration(seconds: 0), () {});
+  Timer t2 = Timer(Duration(seconds: 0), () {});
 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
   UserAccelerometerEvent? _userAccelerometerEvent;
@@ -66,6 +72,8 @@ class _ConnectState extends State<Data_Connect> {
   Timer? _timer;
 
   Box? confapp;
+  late Box pidDisc;
+  late pidsDisc pidDiskcong;
   Confdata? confdata;
   var bancoInterno = InternalDatabase();
 
@@ -331,12 +339,7 @@ class _ConnectState extends State<Data_Connect> {
 
         if (resps.isNotEmpty) {
           for (var reading in resps) {
-            if (reading['PID'] == '09 02 5') {
-              vin2.unit = reading['description'];
-              vin2.title = reading['title'];
-              vin2.response = reading['response'];
-              vin = vin2;
-            } else {
+            {
               ObdData help2 = ObdData(
                   unit: reading['unit'],
                   title: reading['title'],
@@ -441,13 +444,13 @@ class _ConnectState extends State<Data_Connect> {
         "status": true
       },
     ];
-    int j = 1;
+    
 
     int count = 0;
+int j = 1;
+    int count = 0;
 
-    for (var i in requeridResponse) {
-      checkpis(i);
-
+      print(_responses.length);
       while (_responses.length < j) {
         t = Timer(Duration(seconds: 1), () {
           count += 1;
@@ -458,9 +461,10 @@ class _ConnectState extends State<Data_Connect> {
       _responses[j - 1].timer = count;
       j++;
       count = 0;
-    }
-    */
-    await sendrequestOBDData();
+
+*/
+
+    senrequestOBDData();
 
     //setState(() {
     // _responses;
@@ -476,7 +480,35 @@ class _ConnectState extends State<Data_Connect> {
     }
   }
 
-  Future<void> sendrequestOBDData() async {
+  Future<void> senrequestOBDData() async {
+    String pid1, title1, unit1, desc1;
+    pid1 = pidDiskcong.pid;
+    title1 = pidDiskcong.title;
+    unit1 = pidDiskcong.unit;
+    desc1 = pidDiskcong.description;
+    var oneSec = Duration(seconds: int.parse(confdata!.timereqobd));
+    t2 = Timer.periodic(oneSec, (Timer t) async {
+      if (widget.obd2.connection?.isConnected != false &&
+          widget.obd2.connection?.isConnected != null) {
+        await Future.delayed(
+          Duration(
+            seconds: await widget.obd2.getParamsFromJSON('''
+        [        
+           
+            {
+                "PID": "$pid1",
+                "title": "$title1",
+                "unit": "$unit1",
+                "description": "$desc1"
+            }
+        ]
+      '''),
+          ),
+        );
+      }
+    });
+
+    /*
     Timer.periodic(
       Duration(seconds: int.parse(confdata!.timereqobd)),
       (timer) async {
@@ -501,10 +533,14 @@ class _ConnectState extends State<Data_Connect> {
             ),
           );
         } else {
+          print("oi");
           timer.cancel();
         }
+
+        print("terminou3");
       },
     );
+    */
   }
 
   void getinfo() async {
@@ -573,22 +609,8 @@ class _ConnectState extends State<Data_Connect> {
       });
     }
 
-    var countWidget = 0;
-
-    if (confdata!.acc) {
-      countWidget++;
-    }
-    if (confdata!.obd) {
-      countWidget++;
-    }
-    if (confdata!.gps) {
-      countWidget++;
-    }
-    if (countWidget > 3) {
-      setState(() {
-        aligm = MainAxisAlignment.end;
-      });
-    }
+    pidDisc = await Hive.openBox<pidsDisc>('pidsDisc');
+    pidDiskcong = pidDisc.getAt(widget.value);
   }
 
   @override
@@ -632,9 +654,9 @@ class _ConnectState extends State<Data_Connect> {
         _positionStream =
             Geolocator.getPositionStream(locationSettings: _locationSettings)
                 .listen((Position? position) {
-          print(position == null
-              ? 'Unknown'
-              : '${position.latitude.toString()}, ${position.longitude.toString()}');
+          //print(position == null
+          //    ? 'Unknown'
+          //    : '${position.latitude.toString()}, ${position.longitude.toString()}');
           _position = position;
         });
       }
@@ -676,6 +698,7 @@ class _ConnectState extends State<Data_Connect> {
     await widget.obd2.connection?.finish();
     widget.obd2.connection?.dispose();
     t.cancel();
+    t2.cancel();
   }
 
   @override
@@ -700,58 +723,66 @@ class _ConnectState extends State<Data_Connect> {
           SizedBox(height: 10),
           if (confdata?.gps ?? false)
             Builder(builder: (BuildContext context) {
-              return Container(height: 300, child: MapWidget(points: points));
+              return Column(
+                children: [
+                 
+                  Text("GPS"),
+                  SizedBox(height: 10),
+                  Container(height: 300, child: MapWidget(points: points)),
+                ],
+              );
             }),
           SizedBox(height: 10),
           if (confdata?.obd ?? false)
-            Container(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-            
-              decoration: const BoxDecoration(
-                color: Colors.white,
-              ),
-              child: Center(
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Column(
-                        children: [
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          //   children: [
-                          //      Text("Frequência"),
-                          //     Text("Title"),
-                          //    Text("Valor"),
-                          //   ],
-                          // ),
-                          Textdata(
-                            freq: "1",
-                            tipo: 'VIN',
-                            texto: vin.response == '' ? 'VIN' : vin.response,
-                          ),
-                          ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: _responses.length,
-                            itemBuilder: (context, i) {
-                              return Column(
-                                children: [
-                                  Textdata(
-                                    freq: "1",
+            Column(
+              children: [
+                SizedBox(height: 10),
+                Text("Informações do OBD"),
+                SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                  ),
+                  child: Center(
+                      child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            children: [
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              //   children: [
+                              //      Text("Frequência"),
+                              //     Text("Title"),
+                              //    Text("Valor"),
+                              //   ],
+                              // ),
 
-                                    // print([i.pid, i.obddata.unit]);
-                                    tipo: _responses[i].obddata.title == ''
-                                        ? 'PID $i'
-                                        : _responses[i].obddata.title,
-                                    texto: _responses[i].obddata.unit == ''
-                                        ? 'PID $i'
-                                        : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      ))),
+                              ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: _responses.length,
+                                itemBuilder: (context, i) {
+                                  return Column(
+                                    children: [
+                                      Textdata(
+                                        // print([i.pid, i.obddata.unit]);
+                                        tipo: _responses[i].obddata.title == ''
+                                            ? 'PID $i'
+                                            : _responses[i].obddata.title,
+                                        texto: _responses[i].obddata.response ==
+                                                ''
+                                            ? 'PID $i'
+                                            : '${_responses[i].obddata.response} ${_responses[i].obddata.unit}',
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ))),
+                ),
+              ],
             ),
         ],
       ),
