@@ -1,0 +1,20 @@
+                        -H/mnt/66bf9f44-8867-4c11-a294-eeb7bad60a1b/flutter/packages/flutter_tools/gradle/src/main/groovy
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=30
+-DANDROID_PLATFORM=android-30
+-DANDROID_ABI=x86
+-DCMAKE_ANDROID_ARCH_ABI=x86
+-DANDROID_NDK=/home/malkai/Android/Sdk/ndk/27.0.12077973
+-DCMAKE_ANDROID_NDK=/home/malkai/Android/Sdk/ndk/27.0.12077973
+-DCMAKE_TOOLCHAIN_FILE=/home/malkai/Android/Sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/home/malkai/Android/Sdk/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/malkai/Documents/flutter/ObdApp/build/app/intermediates/cxx/Debug/5e1l2u2l/obj/x86
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/malkai/Documents/flutter/ObdApp/build/app/intermediates/cxx/Debug/5e1l2u2l/obj/x86
+-DCMAKE_BUILD_TYPE=Debug
+-B/home/malkai/Documents/flutter/ObdApp/android/app/.cxx/Debug/5e1l2u2l/x86
+-GNinja
+-Wno-dev
+--no-warn-unused-cli
+                        Build command args: []
+                        Version: 2

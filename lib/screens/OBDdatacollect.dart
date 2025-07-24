@@ -5,7 +5,7 @@ import '../functions/obdPlugin.dart';
 
 import 'package:obdapp/functions/InternalDatabase.dart';
 
-import '../widgets/dataConnect.dart';
+import '../widgets/dataConnectwidget.dart';
 
 @RoutePage()
 class obddata extends StatelessWidget {

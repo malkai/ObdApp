@@ -41,13 +41,21 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
       ..acc = fields[18] as bool
       ..watch = fields[19] as bool
       ..phone = fields[20] as bool
-      ..gps = fields[21] as bool;
+      ..gps = fields[21] as bool
+      ..site = fields[25] as String
+      ..rpm = fields[26] as bool
+      ..maf = fields[27] as bool
+      ..percent = fields[28] as bool
+      ..press = fields[29] as bool
+      ..tempa = fields[30] as bool
+      ..templa = fields[31] as bool
+      ..velo = fields[32] as bool;
   }
 
   @override
   void write(BinaryWriter writer, Confdata obj) {
     writer
-      ..writeByte(24)
+      ..writeByte(32)
       ..writeByte(0)
       ..write(obj.rpmmin)
       ..writeByte(1)
@@ -95,7 +103,23 @@ class ConfdataAdapter extends TypeAdapter<Confdata> {
       ..writeByte(23)
       ..write(obj.name)
       ..writeByte(24)
-      ..write(obj.timereqobd);
+      ..write(obj.timereqobd)
+      ..writeByte(25)
+      ..write(obj.site)
+      ..writeByte(26)
+      ..write(obj.rpm)
+      ..writeByte(27)
+      ..write(obj.maf)
+      ..writeByte(28)
+      ..write(obj.percent)
+      ..writeByte(29)
+      ..write(obj.press)
+      ..writeByte(30)
+      ..write(obj.tempa)
+      ..writeByte(31)
+      ..write(obj.templa)
+      ..writeByte(32)
+      ..write(obj.velo);
   }
 
   @override

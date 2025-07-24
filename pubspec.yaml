@@ -54,12 +54,15 @@ dependencies:
   flutter_bluetooth_serial: ^0.4.0
   math_expressions: ^2.3.1
   permission_handler: ^11.3.1
-  workmanager: ^0.5.2
+ 
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  url_launcher: ^6.3.1
+  http: ^1.4.0
+  reown_walletkit: ^1.1.6
 
 dev_dependencies:
   flutter_test:

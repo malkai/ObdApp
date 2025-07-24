@@ -698,7 +698,7 @@ class _getallpidsState extends State<getallpids> {
                     children: [
                       Row(
                         children: [
-                          Text(" " + responses[index].obddata.title),
+                          Text(" ${responses[index].obddata.title}"),
                           SizedBox(width: 10),
                         ],
                       ),
@@ -766,7 +766,7 @@ class _getallpidsState extends State<getallpids> {
                           children: [
                             SizedBox(height: 10),
                             Text(
-                              " " + responses[index].obddata.response,
+                              " ${responses[index].obddata.response}",
                               style: TextStyle(color: Colors.grey),
                             ),
                             SizedBox(height: 10),

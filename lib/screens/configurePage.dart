@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets/conf.dart';
+import '../widgets/confpage.dart';
 
 @RoutePage()
 class configurepage extends StatelessWidget {

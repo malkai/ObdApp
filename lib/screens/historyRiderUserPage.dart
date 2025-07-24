@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets/historyriderlist.dart';
+import '../widgets/historyriderlistpage.dart';
 
 @RoutePage()
 class historyuser extends StatelessWidget {
