@@ -6,8 +6,7 @@ class InternalMath {
     int densityDiesel = 850; // Density of diesel 737g/L
     int densityEthanol = 789; // Density of ethanol 737g/L
 
-    double co2PerGasoline =
-        2310; // co2 per liter of gasoline g/L 2310 -> 23,10
+    double co2PerGasoline = 2310; // co2 per liter of gasoline g/L 2310 -> 23,10
     int co2PerDiesel = 2660; // co2 per liter of diesel g/L
     int co2PerEthanol = 1519; // co2 per liter of ethanol g/L
 
@@ -44,8 +43,7 @@ class InternalMath {
         (massAir * volumetricEfficiency * rpm / 120);
 
     double fuelflow1 =
-        ((massOfAirFlow * 3600) / (afrGasoline * densityGasoline)) /
-            10; //[l/h]
+        ((massOfAirFlow * 3600) / (afrGasoline * densityGasoline)) / 10; //[l/h]
 
     double sfc = vs / (massOfAirFlow / afrGasoline);
 //4284
@@ -79,6 +77,76 @@ class InternalMath {
 
     return [massCo2, fuelConsuption3];
   }
+
+  /*
+
+
+  func ruido(simudata []Tuple) []Tuple {
+
+	noise := []float64{}
+	interpolationdata := []float64{}
+
+	for _, data := range simudata {
+
+		noise = append(noise, data.Comb)
+
+	}
+
+	fmt.Println("Normal	", noise[0]-noise[len(noise)-1])
+
+	//fmt.Println(noise)
+	if len(noise) > 0 {
+		interpolationdata = regress(noise)
+	}
+	//fmt.Println(interpolationdata)
+	fuel_vector := []float64{}
+	time3 := []float64{0}
+	time := 0.0
+
+	for i, ts := range simudata {
+
+		fuel_vector = append(fuel_vector, ts.Comb)
+		if i < len(simudata)-1 {
+			time1 := totaltime(simudata[i].T, simudata[i+1].T)
+
+			time = time + time1
+
+			//rtt, _ := strconv.ParseFloat(tuples[i].T, 64)
+			time3 = append(time3, time)
+		}
+
+	}
+
+	f := piecewiselinear.Function{Y: interpolationdata} // range: "hat" function
+	f.X = time3
+	rtt := [][2]float64{}
+
+	for rty := range time3 {
+		rtt1 := [2]float64{time3[rty], fuel_vector[rty]}
+		rtt = append(rtt, rtt1)
+	}
+	a, b, _, err := Linear(rtt)
+	if err != nil {
+		fmt.Println("Erro em alguma coisa")
+	}
+
+	tui := []float64{}
+	for i := range time3 {
+
+		tui = append(tui, time3[i]*a+b)
+	}
+
+	fmt.Println("Regressão", tui[0]-tui[len(tui)-1])
+
+	for i := range simudata {
+
+		simudata[i].Comb = interpolationdata[i]
+
+	}
+
+	return simudata
+}
+*/
 
   //Linear interpolation
   List regressionLinear1(List a, List b) {
@@ -566,3 +634,6 @@ class InternalMath {
     return double.tryParse(s) != null;
   }
 }
+
+//http://192.168.0.140:3000
+//0x4288201baC903F84648E81A07F793C9E7d893692

@@ -3,8 +3,15 @@ import 'dart:math';
 import 'package:haversine_distance/haversine_distance.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:obdapp/dataBaseClass/blockchainid.dart';
+import 'package:obdapp/functions/blockchain.dart';
 import '../dataBaseClass/obdRawData.dart';
 import '../dataBaseClass/vehiclesUser.dart';
+
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart';
 
 import '../dataBaseClass/confSimu.dart';
 import 'math.dart';
@@ -13,23 +20,39 @@ class InternalDatabase {
   bool a = false;
   var insertEventInstance = InternalMath();
   late Box confapp;
+  late Box walletapp;
 
   void init() async {
-    /*
-    Hive.registerAdapter(UserdataAdapter());
-    Hive.registerAdapter(UserVehicleRawAdapter());
-    Hive.registerAdapter(UserDataProcessAdapter());
-    Hive.registerAdapter(UserAccAdapter());
-    Hive.registerAdapter(PositionClassAdapter());
-    Hive.registerAdapter(ObdRawDataAdapter());
-    Hive.registerAdapter(ObdDataAdapter());
-    Hive.registerAdapter(UserVehiclesAdapter());
-    Hive.registerAdapter(ConfdataAdapter());
-    Hive.registerAdapter(VinAdapter());
-   */
     confapp = await Hive.openBox<Confdata>('conf');
     if (confapp.length <= 0) {
-      newvalue();
+      var defult = Confdata(
+          rpmmin: 750,
+          rpmmax: 10000,
+          velomin: 0,
+          velomax: 120,
+          templamin: 90,
+          templamax: 104.4,
+          pressmin: 14.7,
+          pressmax: 101,
+          vin: '1GBJC34R9XF017297',
+          tempaemin: 30,
+          tempaemax: 70,
+          mafmin: 400,
+          mafmax: 1000,
+          percentmin: 50,
+          percentmax: 70,
+          responseobddata: [],
+          name: 'Appteste',
+          timereqobd: '1',
+          on: false);
+
+      await confapp.add(defult);
+    }
+
+    walletapp = await Hive.openBox<wallet>('wallet');
+    if (walletapp.length <= 0) {
+      var defult = wallet(add: "0", name: "");
+      await walletapp.add(defult);
     }
   }
 
@@ -42,42 +65,14 @@ class InternalDatabase {
       keys.add(element.key);
     }
     if (process.isNotEmpty) {
-      var bancoInterno = InternalDatabase();
-      bancoInterno.processingdataOBD(process, keys);
-    }
-  }
+      print(process.length);
+      blockchain connect = blockchain();
 
-  void newvalue() async {
-    var a = Confdata(
-        rpmmin: 750,
-        rpmmax: 10000,
-        velomin: 0,
-        velomax: 120,
-        templamin: 90,
-        templamax: 104.4,
-        pressmin: 14.7,
-        pressmax: 101,
-        vin: '1GBJC34R9XF017297',
-        tempaemin: 30,
-        tempaemax: 70,
-        mafmin: 400,
-        mafmax: 1000,
-        percentmin: 50,
-        percentmax: 70,
-        responseobddata: [],
-        name: 'Appteste',
-        timereqobd: '1',
-        on: false);
+      //função responsavel por enviar dados;
+      processingdataOBD(process.toList(), keys);
 
-    var confapp = await Hive.openBox<Confdata>('conf');
-    await confapp.add(a);
-  }
-
-  bool isON() {
-    if (Hive.isAdapterRegistered(2)) {
-      return true;
-    } else {
-      return false;
+      //var bancoInterno = InternalDatabase();
+      //bancoInterno.processingdataOBD(process, keys);
     }
   }
 
@@ -111,12 +106,19 @@ class InternalDatabase {
   }
 
   void processingdataOBD(var process, var keys) async {
-  
-    String vin1 = '';
+    blockchain connect = blockchain();
+    Box userdata = await Hive.openBox<wallet>('wallet');
 
+    wallet user = userdata.getAt(0);
+
+    String vin = '';
     DateTime time1 = DateTime.parse('2020-01-02 03:04:05');
     DateTime time2 = DateTime.parse('2020-01-02 03:04:05');
 
+    var helplist = [];
+
+    /*
+   
     double tacc = 0;
     List tarr = [0.0];
     List taccarr = [0.0];
@@ -138,8 +140,71 @@ class InternalDatabase {
     var start = Location(0, 0);
     int i = 0;
     int p = 0;
+    
+    */
+    int j_quebra = 0;
+    for (int i = 0; i < process.length; i++) {
+      if (vin == '') {
+        vin = process[i].uservehicle.vin;
+      }
+      time1 = DateTime.parse(process[i].uservehicle.userdata.time.toString());
+      if (i < process.length - 1) {
+        time2 =
+            DateTime.parse(process[i + 1].uservehicle.userdata.time.toString());
+      }
 
-    for (Userdata element in process) {
+      if (vin != process[i].uservehicle.vin ||
+          time2.difference(time1).inSeconds > 60 ||
+          i == process.length - 1) {
+        if (user.blockchain) {
+          if (await connect.checkconnection("www.google.com")) {
+            print(await connect.checkconnection("www.google.com"));
+            try {
+              Response aux2 = await connect.sendata(helplist).timeout(
+                const Duration(seconds: 5),
+                onTimeout: () {
+                  // Time has run out, do what you wanted to do.
+                  return Response(
+                      'Error', 408); // Request Timeout response status code
+                },
+              );
+
+              if (helplist.length > 1 && aux2.statusCode == 200) {
+                for (int aux = j_quebra; aux < i; aux++) {
+                  //process[aux].uservehicle.userdata.processada = true;
+
+                  //Box obdData = await Hive.openBox<Userdata>('obdData');
+
+                  //await obdData.putAt(process[aux].key, process[aux]);
+                }
+              }
+            } catch (e) {
+              print("servidor de envio fora do ar");
+            }
+          }
+        } else {
+          for (int aux = j_quebra; aux < i; aux++) {
+            //process[aux].uservehicle.userdata.processada = true;
+
+            //Box obdData = await Hive.openBox<Userdata>('obdData');
+
+            //await obdData.putAt(process[aux].key, process[aux]);
+          }
+        }
+
+        j_quebra = i;
+
+        helplist.clear();
+      } else {
+        helplist.add(process[i].uservehicle);
+        vin = process[i].uservehicle.vin;
+        //process[i].uservehicle.userdata.processada = true;
+
+        //Box obdData = await Hive.openBox<Userdata>('obdData');
+
+        //await obdData.putAt(process[i].key, process[i]);
+      }
+      /*
       p += validInfo(element);
 
       if (vin1 == '') {
@@ -201,7 +266,8 @@ class InternalDatabase {
           kmaccv = kmaccv + deltkmobd;
           kmaccarrv.add(kmaccv);
           try {
-            double fuelhelp = double.parse(element.uservehicle.userdata.userdata!
+            double fuelhelp = double.parse(element
+                .uservehicle.userdata.userdata!
                 .firstWhere((element) => element.pid == '01 2F')
                 .obddata
                 .response);
@@ -266,20 +332,13 @@ class InternalDatabase {
             await teste2.close();
           }
         }
-      }
+        */
+
       //print(process[i].uservehicle.userdata.processada);
-      element.uservehicle.userdata.processada = true;
-      //print(order[i].uservehicle.);
-      Box obdData = await Hive.openBox<Userdata>('obdData');
-      //var ty = obdData.values.toList();
-      //int index = ty.indexWhere((item) => item == element);
-      //print(index);
 
-      await obdData.putAt(element.key, element);
-
-      if (i <= process.length - 1) {
-        i++;
-      }
+      //if (i <= process.length - 1) {
+      //  i++;
+      //}
     }
   }
 }

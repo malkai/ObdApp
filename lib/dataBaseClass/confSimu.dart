@@ -144,22 +144,20 @@ class Confdata {
   String timereqobd;
 
   @HiveField(25)
-  String site = "";
-
-  @HiveField(26)
   bool rpm = true;
-  @HiveField(27)
+  @HiveField(26)
   bool maf = true;
-  @HiveField(28)
+  @HiveField(27)
   bool percent = true;
-  @HiveField(29)
+  @HiveField(28)
   bool press = true;
-  @HiveField(30)
+  @HiveField(29)
   bool tempa = true;
-  @HiveField(31)
+  @HiveField(30)
   bool templa = true;
-  @HiveField(32)
+  @HiveField(31)
   bool velo = true;
+
   
   Confdata({
     required this.rpmmax,

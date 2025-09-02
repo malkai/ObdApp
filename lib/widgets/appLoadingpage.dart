@@ -4,6 +4,9 @@ import 'package:device_info_plus/device_info_plus.dart';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:obdapp/dataBaseClass/blockchainid.dart';
+import 'package:obdapp/functions/blockchain.dart';
 import '../functions/InternalDatabase.dart';
 import '../route/autoroute.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,6 +51,18 @@ class _AppLoadingState extends State<AppLoading> {
         await Permission.location.request();
       }
     }
+
+    blockchain connect = blockchain();
+    late Box userdata;
+
+    userdata = await Hive.openBox<wallet>('wallet');
+
+    wallet user = userdata.getAt(0);
+
+    if (user.blockchain) {
+      connect.getserver(user.site);
+    }
+
     var bancoInterno = InternalDatabase();
     bancoInterno.init();
     await bancoInterno.handledata().then((value) {

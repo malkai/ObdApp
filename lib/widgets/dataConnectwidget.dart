@@ -48,8 +48,6 @@ class _ConnectState extends State<Data_Connect> {
   ObdData vin = ObdData(response: '', title: '', unit: '');
   MainAxisAlignment aligm = MainAxisAlignment.center;
 
-  PositionClass? pc;
-
   bool teste = true;
   List<LatLng> points = [];
   Timer t = Timer(Duration(seconds: 0), () {});
@@ -70,6 +68,8 @@ class _ConnectState extends State<Data_Connect> {
   bool isLastPositionInitialized = false;
   double distanceInMeters = 0;
   Timer? _timer;
+
+  double comb = 0;
 
   Box? confapp;
   late Box pidDisc;
@@ -142,17 +142,17 @@ class _ConnectState extends State<Data_Connect> {
             },
   */
 
-  void getGps(var pc) {
-    if (_position != null) {
-      GeoPoint actualPosition =
-          GeoPoint(_position!.latitude, _position!.longitude);
-      PositionClass pc =
-          PositionClass(lat: _position!.latitude, long: _position!.longitude);
-      pc.lat = roundDouble(actualPosition.latitude, 4);
-      pc.long = roundDouble(actualPosition.longitude, 4);
-      LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
-          roundDouble(actualPosition.longitude, 4));
+  PositionClass getGps() {
+    GeoPoint actualPosition =
+        GeoPoint(_position!.latitude, _position!.longitude);
+    PositionClass pc =
+        PositionClass(lat: _position!.latitude, long: _position!.longitude);
+    pc.lat = roundDouble(actualPosition.latitude, 4);
+    pc.long = roundDouble(actualPosition.longitude, 4);
+    LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
+        roundDouble(actualPosition.longitude, 4));
 
+    if (pc.lat != 0.0 && pc.long != 0.0) {
       if (points.length > 1 && points.length < 2) {
         var distance = Distance();
         //create a new distance calculator with Haversine algorithm
@@ -172,7 +172,11 @@ class _ConnectState extends State<Data_Connect> {
       } else {
         points.add(aux);
       }
+
+      return pc;
     }
+
+    return pc;
   }
 
   void accuser(String x, y, z, unit) {
@@ -189,14 +193,17 @@ class _ConnectState extends State<Data_Connect> {
     }
   }
 
-  void simuobdtime() {
+  void simuobdtime(PositionClass pc, int count) {
+    int count_aux = count;
     Timer.periodic(Duration(seconds: int.parse(confdata!.timereqobd)),
         (timer) async {
       _timer = timer;
 
-      if (confdata!.gps) {
-        print("oi");
-        getGps(pc);
+      if (confdata!.gps && _position != null && timer.isActive) {
+        pc = getGps();
+        if (pc.lat != 0.0 && pc.long != 0.0) {
+          count_aux -= 1;
+        }
         updatemap();
         setState(() {
           points;
@@ -204,10 +211,12 @@ class _ConnectState extends State<Data_Connect> {
       }
 
       if (confdata!.acc) {
+        count_aux -= 1;
         accuser(acc.x, acc.y, acc.z, acc.unit);
       }
 
       if (confdata!.obd) {
+        count_aux -= 1;
         Random random = Random();
         List<ObdRawData> responses1 = [];
         late ObdData help2;
@@ -229,10 +238,7 @@ class _ConnectState extends State<Data_Connect> {
           help2 = ObdData(
               unit: "%",
               title: "nivel de combustivel",
-              response: (random.nextDouble() *
-                          (confdata!.percentmax - confdata!.percentmin) +
-                      confdata!.percentmin)
-                  .toString());
+              response: comb.toStringAsFixed(2));
           help1 = ObdRawData(pid: '01 2F', obddata: help2);
           responses1.add(help1);
         }
@@ -307,30 +313,34 @@ class _ConnectState extends State<Data_Connect> {
       }
       bool a = await checkUserConnection();
 
-      UserDataProcess save = UserDataProcess(
-          processada: false,
-          isOnline: false,
-          signature: '',
-          userdata: _responses,
-          acc: acc,
-          pos: pc,
-          time: DateTime.now());
-      var signature = await sign(save).then((signature) => signature);
-      save.signature = signature.toString();
-      UserVehicleRaw vehicledata =
-          UserVehicleRaw(userdata: save, vin: vin.response);
+      if (count != count_aux) {
+        UserDataProcess save = UserDataProcess(
+            processada: false,
+            isOnline: false,
+            signature: '',
+            userdata: _responses,
+            acc: acc,
+            pos: pc,
+            time: DateTime.now());
+        //var signature = await sign(save).then((signature) => signature);
+        //save.signature = signature.toString();
+        UserVehicleRaw vehicledata =
+            UserVehicleRaw(userdata: save, vin: vin.response);
 
-      Userdata tobesaved = Userdata(name: uniqueid!, uservehicle: vehicledata);
-      savejson.add(tobesaved);
+        Userdata tobesaved =
+            Userdata(name: uniqueid!, uservehicle: vehicledata);
+        savejson.add(tobesaved);
 
-      var userd = tobesaved.toJson();
-      data.add(userd);
-      if (save.isOnline) {
-        //Repository.add(tobesaved);
-        //  bancoInterno.insertObdData(tobesaved);
-      } else {
-        //  bancoInterno.insertObdData(tobesaved);
+        var userd = tobesaved.toJson();
+        data.add(userd);
+        if (save.isOnline) {
+          //Repository.add(tobesaved);
+          bancoInterno.insertObdData(tobesaved);
+        } else {
+          bancoInterno.insertObdData(tobesaved);
+        }
       }
+      comb = comb - 0.001;
 
       await Future.delayed(
         Duration(seconds: int.parse(confdata!.timereqobd)),
@@ -338,11 +348,11 @@ class _ConnectState extends State<Data_Connect> {
     });
   }
 
-  void obdinfo() async {
+  void obdinfo(PositionClass? pc, int count) async {
     if (!(await widget.obd2.isListenToDataInitialed)) {
       widget.obd2.setOnDataReceived((command, response, requestCode) async {
         if (confdata!.gps) {
-          getGps(pc);
+          pc = getGps();
           updatemap;
         }
 
@@ -564,24 +574,36 @@ int j = 1;
         File(diretorioUsuario.path + "/" + DateTime.now().toString() + '.json');
     String terre = "${diretorioUsuario.path}/${DateTime.now()}";
     file.create();
+    PositionClass pc = PositionClass(lat: 0, long: 0);
+    int count = 0;
 
-    print(confdata!.obd);
+    if (confdata!.obd) {
+      count += 1;
+    }
+    if (confdata!.gps) {
+      count += 1;
+    }
+    if (confdata!.acc) {
+      count += 1;
+    }
 
     if (confdata!.obd) {
       if (confdata!.on) {
         print("oi1");
-        simuobdtime();
+        simuobdtime(pc, count);
       } else {
         print("oi2");
-        obdinfo();
+        obdinfo(pc, count);
       }
     } else {
       print("oi3");
-      simuobdtime();
+      simuobdtime(pc, count);
     }
   }
 
   Future<void> init() async {
+    Random random = Random();
+
     if (Platform.isIOS) {
       var iosDeviceInfo = await deviceInfo.iosInfo;
       uniqueid = iosDeviceInfo.identifierForVendor;
@@ -616,11 +638,17 @@ int j = 1;
           timereqobd: '1',
           on: false);
       confdata = a;
+      comb =
+          (random.nextDouble() * (confdata!.percentmax - confdata!.percentmin) +
+              confdata!.percentmin);
     } else {
       confdata = confapp!.getAt(0);
       setState(() {
         confdata;
       });
+      comb =
+          (random.nextDouble() * (confdata!.percentmax - confdata!.percentmin) +
+              confdata!.percentmin);
     }
 
     pidDisc = await Hive.openBox<pidsDisc>('pidsDisc');
@@ -681,6 +709,9 @@ int j = 1;
   @override
   void dispose() async {
     super.dispose();
+
+    await _positionStream?.cancel();
+
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
@@ -761,15 +792,6 @@ int j = 1;
                           scrollDirection: Axis.vertical,
                           child: Column(
                             children: [
-                              // Row(
-                              //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              //   children: [
-                              //      Text("Frequência"),
-                              //     Text("Title"),
-                              //    Text("Valor"),
-                              //   ],
-                              // ),
-
                               ListView.builder(
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,

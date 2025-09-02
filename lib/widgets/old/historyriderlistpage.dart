@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
-import '../dataBaseClass/vehiclesUser.dart';
-import '../widgets/historyrideruserWidget.dart';
+import '../../dataBaseClass/vehiclesUser.dart';
+import 'historyrideruserWidget.dart';
 
 class HistoryUserWidget extends StatefulWidget {
   const HistoryUserWidget({super.key});

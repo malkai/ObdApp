@@ -9,7 +9,7 @@ import '../screens/OBDdatacollect.dart';
 import '../screens/appMainPage.dart';
 import '../screens/configurePage.dart';
 import '../screens/riderObdUserPage.dart';
-import '../screens/historyRiderUserPage.dart';
+import '../screens/historyPage.dart';
 
 part '../route/autoroute.gr.dart';
 
@@ -22,8 +22,8 @@ class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
         AutoRoute(path: '/initial', page: Appmain.page, children: [
-         
           AutoRoute(path: 'ride', page: Ride.page),
+          AutoRoute(path: 'hist', page: Historyuser.page),
           AutoRoute(path: 'conf', page: Configurepage.page),
         ]),
         AutoRoute(
@@ -40,7 +40,6 @@ class AppRouter extends RootStackRouter {
             path: 'getallpids',
             page: Getallpids.page,
           ),
-        
         ]),
       ];
 }

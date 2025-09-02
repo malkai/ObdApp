@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import '../dataBaseClass/vehiclesUser.dart';
+import '../../dataBaseClass/vehiclesUser.dart';
 import 'package:latlong2/latlong.dart';
-import '../widgets/textWidget.dart';
+import '../textWidget.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HistoryRideUser extends StatefulWidget {
@@ -43,6 +43,8 @@ class _ObdDataMapState extends State<HistoryRideUser> {
     }
 
     print(lat);
+
+    /*
     for (int i = 0; i < aux.vehicle.kmaccarre.length - 1; i++) {
       infokm2.add(
           kmData(aux.vehicle.kmaccarre[i], aux.vehicle.taccarr[i].toString()));
@@ -55,6 +57,7 @@ class _ObdDataMapState extends State<HistoryRideUser> {
       infokm3.add(
           kmData(aux.vehicle.kmaccarrv[i], aux.vehicle.taccarr[i].toString()));
     }
+    */
     setState(
       () {
         lat;

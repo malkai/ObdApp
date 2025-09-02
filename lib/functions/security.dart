@@ -82,7 +82,6 @@ Future<bool> hasKeys() async {
 }
 
 //verificar uma chave universal por usuario
-
 Future<Signature> sign(UserDataProcess data) async {
   Signature sig;
 

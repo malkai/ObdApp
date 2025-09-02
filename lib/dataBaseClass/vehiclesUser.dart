@@ -7,77 +7,51 @@ class UserVehicles {
   @HiveField(0)
   String user;
   @HiveField(1)
-  Vin vehicle;
+  Path vehicle;
   UserVehicles({
     required this.user,
     required this.vehicle,
   });
 }
 
+
 @HiveType(typeId: 1)
-class Vin {
+class Path {
   @HiveField(0)
   String id;
 
   //time
-
   @HiveField(1)
-  List tarr;
-  @HiveField(2)
   double tacc;
-  @HiveField(3)
-  List taccarr;
-
-
 
   //distance_eucle
-
-  @HiveField(4)
+  @HiveField(2)
   List kmarre;
-  @HiveField(5)
-  double kmacce;
-  @HiveField(6)
-  List kmaccarre;
 
-  //distance_vs
-
-  @HiveField(7)
-  List kmarrv;
-  @HiveField(8)
-  double kmaccv;
-  @HiveField(9)
-  List kmaccarrv;
-
-  //Kalmanfilter AND savitzky_golay
-
-  @HiveField(10)
+  //regressão linear lista
+  @HiveField(3)
   List farrk;
 
-  @HiveField(11)
+  //inicio final do consuno
+  @HiveField(4)
   List fuelkf;
 
-  //fuelsf: auxf[1],
-
-  @HiveField(12)
+  //dados aprovados
+  @HiveField(5)
   double percentdata;
 
-  @HiveField(13)
+  //data do evento
+  @HiveField(6)
   DateTime time = DateTime.now();
 
-  @HiveField(14)
+  //data do evento lat and long
+  @HiveField(7)
   List points = [];
 
-  Vin({
+  Path({
     required this.id,
-    required this.tarr,
     required this.tacc,
-    required this.taccarr,
     required this.kmarre,
-    required this.kmacce,
-    required this.kmaccarre,
-    required this.kmarrv,
-    required this.kmaccv,
-    required this.kmaccarrv,
     required this.farrk,
     required this.percentdata,
     required this.fuelkf,
