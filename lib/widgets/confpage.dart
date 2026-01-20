@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:obdapp/dataBaseClass/blockchainid.dart';
+import 'package:obdapp/functions/blockchain.dart';
 import 'package:obdapp/functions/obdPlugin.dart';
 import 'package:obdapp/route/autoroute.dart';
 
@@ -20,10 +22,14 @@ class _ConfwidgetState extends State<Confwidget> {
   late Box userdata;
   var myController = TextEditingController(text: 'Appteste');
   var servidor = TextEditingController(text: '');
+  var tank = TextEditingController(text: '');
+  var vin = TextEditingController(text: '');
   var add = TextEditingController(text: '');
   var speed = TextEditingController(text: '1');
 
-  wallet user= wallet(add: "", name: "");
+  bool blockchainbool = false;
+
+  wallet user = wallet(add: "", name: "");
 
   Confdata confdata = Confdata(
       rpmmin: 750,
@@ -47,51 +53,142 @@ class _ConfwidgetState extends State<Confwidget> {
       on: false);
 
   void init() async {
+    print("oiconfig");
     confapp = await Hive.openBox<Confdata>('conf');
     setState(() {
       confdata = confapp.getAt(0);
     });
 
     userdata = await Hive.openBox<wallet>('wallet');
+    print(userdata.length);
+    print(user.vin);
+    print(user.vin);
+
     setState(() {
       user = userdata.getAt(0);
-    });
+      myController = TextEditingController(text: confdata.name);
+      speed = TextEditingController(text: confdata.timereqobd);
+      servidor = TextEditingController(text: user.site);
+      add = TextEditingController(text: user.add);
+      blockchainbool = user.blockchain;
 
-    myController = TextEditingController(text: confdata.name);
-    speed = TextEditingController(text: confdata.timereqobd);
-    servidor = TextEditingController(text: user.site);
-    add = TextEditingController(text: user.add);
+      vin = TextEditingController(text: user.vin);
+      tank = TextEditingController(text: user.usertank);
+    });
   }
 
   @override
   void initState() {
     super.initState();
+
     init();
   }
 
   void updateconf() async {
-    var cont = 0;
+    final connect = blockchain();
+    wallet user = userdata.getAt(0);
+    blockchain auxblock = blockchain();
 
-    if (confdata.acc) {
-      cont++;
-    }
-    if (confdata.obd) {
-      cont++;
-    }
-    if (confdata.gps) {
-      cont++;
+    final enabledFunctionsCount = [
+      confdata.acc,
+      confdata.obd,
+      confdata.gps,
+    ].where((isEnabled) => isEnabled).length;
+
+    if (enabledFunctionsCount == 0) {
+      _eMyDialog("Necessário ativar pelo menos uma função: ACC, OBD ou GPS.");
+      return; // Early return para evitar o restante do código
     }
 
-    if (cont == 0) {
-      _eMyDialog("Necessario ativar uma função: \n GPS, OBD ou Acc");
+    bool blockcainvalueant = user.blockchain;
+
+    user.blockchain = blockchainbool;
+    user.vin = vin.text;
+    user.usertank = tank.text;
+    String text = "";
+
+    Map<String, dynamic> data = {
+      'wallet': user.add,
+      'vin': user.vin,
+      'usertank': user.usertank,
+    };
+
+    bool proced = false;
+
+    bool canProceed = true;
+    if (blockchainbool &&
+        await auxblock.checkServerStatus(user.site + ":3000/")) {
+      String help = user.site;
+
+      final storage = FlutterSecureStorage();
+      var aux2 = await storage.read(key: 'publickey');
+      if (aux2 != null) {
+        user.add = aux2;
+      }
+
+      if (await connect.getserver(help + ":3000") == "") {
+        canProceed = false;
+        text = "Servidor invalido";
+      }
+
+      print("antes de enviar");
+
+      print(await auxblock.postEvent("$help:3000/get/user", data));
+
+      print(user.usertank is int);
+
+      int? tank = int.tryParse(user.usertank);
+
+      if (await auxblock.postEvent(user.site + ":3000/get/user", data) ==
+              "Existe" &&
+          canProceed) {
+        if (user.vin == "") {
+          canProceed = false;
+          text = "Vin (string não vazia) ";
+        } else if (tank == null) {
+          canProceed = false;
+          text = "Tanque de comb somente números inteiro ";
+        } else if (canProceed) {
+          await auxblock.postEvent("$help:3000/post/updateuser", data);
+          await auxblock.getpaths(user.add);
+          auxblock.getscore(user.add);
+        }
+      } else if (canProceed) {
+        // Atualiza os dados do usuário no Hive
+        final userdata = await Hive.openBox<wallet>('wallet');
+        if (user.vin == "") {
+          canProceed = false;
+          text = "Vin (string não vazia) ";
+        } else if (tank == null) {
+          canProceed = false;
+          text = "Tanque de comb  somente números inteiro ";
+        } else {
+          await auxblock.postEvent("$help:3000/create/contract", data);
+          await auxblock.getpaths(user.add);
+          auxblock.getscore(user.add);
+        }
+
+        await userdata.putAt(0, user);
+      }
     } else {
-      confapp = await Hive.openBox<Confdata>('conf');
-      userdata = await Hive.openBox<wallet>('wallet');
+      //MUDAR A VARIAVEL TRUE FALSE
+      await userdata.putAt(0, user);
+    }
 
-      confapp.putAt(0, confdata);
-      userdata.putAt(0, user);
-      confapp.close();
+    // Se 'canProceed' for falso, significa que o if acima foi executado
+    // e a conexão falhou, portanto não continua.
+    if (canProceed) {
+      // Atualiza as configurações do aplicativo no Hive
+      final confapp = await Hive.openBox<Confdata>('conf');
+      await confapp.putAt(0, confdata);
       _showMyDialog();
+      if (blockcainvalueant != blockchainbool) {
+        await Future.delayed(Duration(seconds: 2));
+
+        context.router.replace(Loadingpage());
+      }
+    } else {
+      _eMyDialog(text);
     }
   }
 
@@ -99,6 +196,9 @@ class _ConfwidgetState extends State<Confwidget> {
   void dispose() {
     super.dispose();
     updateconf();
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
   }
 
   Future<void> _eMyDialog(String erro) async {
@@ -129,6 +229,7 @@ class _ConfwidgetState extends State<Confwidget> {
   }
 
   Future<void> _showMyDialog() async {
+    if (!mounted) return;
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -186,7 +287,7 @@ class _ConfwidgetState extends State<Confwidget> {
               Icons.save,
               color: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               updateconf();
             },
           ),
@@ -250,10 +351,10 @@ class _ConfwidgetState extends State<Confwidget> {
                           children: [
                             Container(
                               child: Switch(
-                                  value: user.blockchain,
+                                  value: blockchainbool,
                                   onChanged: (value) {
                                     setState(() {
-                                      user.blockchain = value;
+                                      blockchainbool = value;
                                     });
                                   }),
                             ),
@@ -263,7 +364,7 @@ class _ConfwidgetState extends State<Confwidget> {
                                 child: const Text('Conectar a Blockchain ')),
                           ],
                         ),
-                        if (user.blockchain)
+                        if (blockchainbool)
                           Container(
                             padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                             child: TextFormField(
@@ -279,21 +380,53 @@ class _ConfwidgetState extends State<Confwidget> {
                               ),
                             ),
                           ),
-                        if (user.blockchain)
+                        if (blockchainbool)
                           Container(
                             padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                             child: TextFormField(
-                              controller: add,
+                              controller: vin,
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
-                                labelText: 'Endereço',
+                                labelText: 'VIN',
                               ),
                               onChanged: (values) => setState(
                                 () {
-                                  user.add = add.text;
+                                  user.vin = vin.text;
                                 },
                               ),
                             ),
+                          ),
+                        if (blockchainbool)
+                          Container(
+                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                            child: TextFormField(
+                              controller: tank,
+                              decoration: const InputDecoration(
+                                border: UnderlineInputBorder(),
+                                labelText: 'Tanque de comb',
+                              ),
+                              onChanged: (values) => setState(
+                                () {
+                                  user.usertank = tank.text;
+                                },
+                              ),
+                            ),
+                          ),
+                        if (blockchainbool)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: Text("Wallet Address"),
+                              ),
+                              Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                child: SelectableText(user.add),
+                              ),
+                            ],
                           ),
                         Row(
                           children: [

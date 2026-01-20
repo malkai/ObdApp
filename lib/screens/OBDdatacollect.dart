@@ -34,7 +34,7 @@ class obddata extends StatelessWidget {
                 //Apploadingrouter()
                 var bancoInterno = InternalDatabase();
                 await bancoInterno.handledata().then((value) {
-                  context.router.popUntilRoot();
+                  AutoRouter.of(context).popForced();
                 });
 
                 //

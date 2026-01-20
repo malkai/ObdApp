@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+
 part 'obdRawData.g.dart';
 
 @HiveType(typeId: 2)
@@ -52,10 +53,10 @@ class UserDataProcess {
 
   Map<dynamic, dynamic> listtoMap() {
     var map = {};
-    if (userdata != null){
-    for (var element in userdata!) {
-      map[element.pid] = {element.obddata.toJson()};
-    }
+    if (userdata != null) {
+      for (var element in userdata!) {
+        map[element.pid] = {element.obddata.toJson()};
+      }
     }
     return map;
   }
@@ -134,7 +135,7 @@ class ObdRawData {
   @HiveField(1)
   ObdData obddata;
   @HiveField(2)
-  int timer=0;
+  int timer = 0;
   ObdRawData({
     required this.pid,
     required this.obddata,

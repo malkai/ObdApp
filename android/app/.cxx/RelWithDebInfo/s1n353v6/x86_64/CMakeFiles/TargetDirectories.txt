@@ -1,0 +1,2 @@
+/home/malkai/Documents/flutter/ObdApp/android/app/.cxx/RelWithDebInfo/s1n353v6/x86_64/CMakeFiles/edit_cache.dir
+/home/malkai/Documents/flutter/ObdApp/android/app/.cxx/RelWithDebInfo/s1n353v6/x86_64/CMakeFiles/rebuild_cache.dir

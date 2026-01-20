@@ -11,10 +11,7 @@ import 'package:obdapp/dataBaseClass/obdRawData.dart';
 import 'package:obdapp/functions/InternalDatabase.dart';
 import 'package:obdapp/functions/obdPlugin.dart';
 import 'package:obdapp/route/autoroute.dart';
-import 'package:obdapp/widgets/textWidget.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
-
-import '../dataBaseClass/pidDiscoveryClass.dart';
 
 @RoutePage()
 class getallpids extends StatefulWidget {
@@ -287,8 +284,9 @@ class _getallpidsState extends State<getallpids> {
     if (obd2.connection?.isConnected != false &&
         obd2.connection?.isConnected != null) {
       await Future.delayed(
-          Duration(milliseconds: await obd2.getParamsFromJSON(jsonString)),
-          () {print("done");});
+          Duration(milliseconds: await obd2.getParamsFromJSON(jsonString)), () {
+        print("done");
+      });
     }
   }
 
@@ -470,30 +468,6 @@ class _getallpidsState extends State<getallpids> {
         await Future.delayed(Duration(seconds: 10));
       }
 
-/*
-      int j = 1;
-
-      int count = 0;
-
-
-
-      for (var i in requeridResponse) {
-        
-
-        while (responses.length < j) {
-          await Future.delayed(
-            Duration(seconds: 5),
-          );
-          count += 5;
-          print(count);
-        }
-        print("oi");
-        responses[j - 1].timer = count;
-        j++;
-        count = 0;
-      }
-
-*/
       insetpid(responses);
 
       setState(() {

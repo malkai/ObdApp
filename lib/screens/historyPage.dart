@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:obdapp/widgets/historywidget.dart';
+import 'package:obdapp/widgets/historywidgets/pagehistorywidget.dart';
 
 
 @RoutePage()

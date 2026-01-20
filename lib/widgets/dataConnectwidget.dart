@@ -210,7 +210,7 @@ class _ConnectState extends State<Data_Connect> {
         });
       }
 
-      if (confdata!.acc) {
+      if (confdata!.acc && timer.isActive) {
         count_aux -= 1;
         accuser(acc.x, acc.y, acc.z, acc.unit);
       }
@@ -242,6 +242,7 @@ class _ConnectState extends State<Data_Connect> {
           help1 = ObdRawData(pid: '01 2F', obddata: help2);
           responses1.add(help1);
         }
+        // nível de combustível
 
         if (confdata!.press) {
           help2 = ObdData(
@@ -306,10 +307,11 @@ class _ConnectState extends State<Data_Connect> {
         vin = ObdData(unit: "", title: "VIN", response: confdata!.vin);
         //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
         //_responses1.add(help1);
-
-        setState(() {
-          _responses = responses1;
-        });
+        if (timer.isActive) {
+          setState(() {
+            _responses = responses1;
+          });
+        }
       }
       bool a = await checkUserConnection();
 
@@ -351,7 +353,7 @@ class _ConnectState extends State<Data_Connect> {
   void obdinfo(PositionClass? pc, int count) async {
     if (!(await widget.obd2.isListenToDataInitialed)) {
       widget.obd2.setOnDataReceived((command, response, requestCode) async {
-        if (confdata!.gps) {
+        if (confdata!.gps && _position != null) {
           pc = getGps();
           updatemap;
         }
@@ -373,44 +375,45 @@ class _ConnectState extends State<Data_Connect> {
               responses1.add(help1);
             }
           }
-        }
-        _responses.clear;
-        setState(() {
-          _responses = responses1;
-        });
 
-        if (confdata!.acc) {
-          accuser(acc.x, acc.y, acc.z, acc.unit);
-        }
-        bool a = await checkUserConnection();
+          _responses.clear;
+          setState(() {
+            _responses = responses1;
+          });
 
-        UserDataProcess save = UserDataProcess(
-            processada: false,
-            isOnline: a,
-            signature: '',
-            userdata: _responses,
-            acc: acc,
-            pos: pc,
-            time: DateTime.now());
-        var signature = await sign(save).then((signature) => signature);
-        save.signature = signature.toString();
-        UserVehicleRaw vehicledata =
-            UserVehicleRaw(userdata: save, vin: confdata!.name);
-        if (vin.response != '') {
-          vehicledata = UserVehicleRaw(userdata: save, vin: vin.response);
-        }
+          if (confdata!.acc) {
+            accuser(acc.x, acc.y, acc.z, acc.unit);
+          }
+          bool a = await checkUserConnection();
 
-        Userdata tobesaved =
-            Userdata(name: uniqueid!, uservehicle: vehicledata);
-        savejson.add(tobesaved);
-        var userd = tobesaved.toJson();
-        data.add(userd);
+          UserDataProcess save = UserDataProcess(
+              processada: false,
+              isOnline: a,
+              signature: '',
+              userdata: _responses,
+              acc: acc,
+              pos: pc,
+              time: DateTime.now());
+          var signature = await sign(save).then((signature) => signature);
+          save.signature = signature.toString();
+          UserVehicleRaw vehicledata =
+              UserVehicleRaw(userdata: save, vin: confdata!.name);
+          if (vin.response != '') {
+            vehicledata = UserVehicleRaw(userdata: save, vin: vin.response);
+          }
 
-        if (save.isOnline) {
-          //Repository.add(tobesaved);
-          //bancoInterno.insertObdData(tobesaved);
-        } else {
-          //bancoInterno.insertObdData(tobesaved);
+          Userdata tobesaved =
+              Userdata(name: uniqueid!, uservehicle: vehicledata);
+          savejson.add(tobesaved);
+          var userd = tobesaved.toJson();
+          data.add(userd);
+
+          if (save.isOnline) {
+            //Repository.add(tobesaved);
+            //bancoInterno.insertObdData(tobesaved);
+          } else {
+            //bancoInterno.insertObdData(tobesaved);
+          }
         }
       });
     }

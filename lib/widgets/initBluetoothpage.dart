@@ -53,27 +53,29 @@ class _FloatState extends State<InitBluetooth> {
   OverlayEntry? entry;
 
   void init() async {
+    if (!mounted) return;
     pidDisc = await Hive.openBox<pidsDisc>('pidsDisc');
 
-    setState(() {
-      getresponse = pidDisc!.values.toList();
-    });
+    getresponse = pidDisc!.values.toList();
+
     confapp = await Hive.openBox<Confdata>('conf');
     confdata = confapp.getAt(0);
   }
 
   @override
   void initState() {
-    init();
     super.initState();
+    init();
   }
 
   @override
   void dispose() {
+    init();
     super.dispose();
   }
 
   Future<void> showerror(String erro) async {
+    if (!mounted) return;
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -106,6 +108,7 @@ class _FloatState extends State<InitBluetooth> {
   }
 
   Future<void> insetpid(int index) async {
+    if (!mounted) return;
     var element = pidsDisc(pid: pid.text, title: title.text);
     element.unit = length.text;
     element.description = description.text;
@@ -125,6 +128,7 @@ class _FloatState extends State<InitBluetooth> {
   }
 
   Future<void> deletpid(int index) async {
+    if (!mounted) return;
     pidDisc = await Hive.openBox<pidsDisc>('pidsDisc');
     pidDisc!.deleteAt(index);
 
@@ -136,6 +140,7 @@ class _FloatState extends State<InitBluetooth> {
   }
 
   void openedit(TextEditingController p, l, t, d, int index) {
+    if (!mounted) return;
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -218,6 +223,7 @@ class _FloatState extends State<InitBluetooth> {
   Future<void> showBluetoothList(
       BuildContext context, ObdPlugin obd2plugin) async {
     List<BluetoothDevice> devices = await obd2plugin.getPairedDevices;
+    if (!mounted) return;
 
     showBottomSheet(
         context: context,

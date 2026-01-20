@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:obdapp/functions/obdPlugin.dart';
+import 'package:obdapp/screens/marketPage.dart';
+import 'package:obdapp/widgets/historywidgets/pageeventListPath.dart';
 import 'package:obdapp/screens/pidsDiscovery.dart';
 import 'package:obdapp/screens/getAllPids.dart';
 
@@ -24,12 +26,20 @@ class AppRouter extends RootStackRouter {
         AutoRoute(path: '/initial', page: Appmain.page, children: [
           AutoRoute(path: 'ride', page: Ride.page),
           AutoRoute(path: 'hist', page: Historyuser.page),
+          AutoRoute(
+            path: 'market',
+            page: Marketplace.page,
+          ),
           AutoRoute(path: 'conf', page: Configurepage.page),
         ]),
         AutoRoute(
           path: '/app',
           initial: true,
           page: Loadingpage.page,
+        ),
+        AutoRoute(
+          path: '/listclosepath',
+          page: EventListPath.page,
         ),
         AutoRoute(
           path: '/obddta:obd2',

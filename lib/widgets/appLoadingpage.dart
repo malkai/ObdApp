@@ -1,15 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:obdapp/dataBaseClass/blockchainid.dart';
 import 'package:obdapp/functions/blockchain.dart';
 import '../functions/InternalDatabase.dart';
 import '../route/autoroute.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:web3dart/web3dart.dart';
+import 'dart:math';
+import 'package:web3dart/web3dart.dart';
 
 class AppLoading extends StatefulWidget {
   final String text;
@@ -52,15 +57,30 @@ class _AppLoadingState extends State<AppLoading> {
       }
     }
 
-    blockchain connect = blockchain();
-    late Box userdata;
+    Box userdata = await Hive.openBox<wallet>('wallet');
 
-    userdata = await Hive.openBox<wallet>('wallet');
-
-    wallet user = userdata.getAt(0);
-
-    if (user.blockchain) {
-      connect.getserver(user.site);
+    if (userdata.isNotEmpty) {
+      wallet user = userdata.getAt(0);
+      Map<String, dynamic> data = {
+        'wallet': user.add,
+      };
+      blockchain auxblock = blockchain();
+      if (user.blockchain) {
+        if (await auxblock.checkServerStatus(user.site + ":3000")) {
+          if (await auxblock.postEvent(user.site + ":3000",data) == "Existe") {
+            await auxblock.getpaths(user.add);
+            auxblock.getscore(user.add);
+          } else {
+            Map<String, dynamic> data = {
+              'wallet': user.add,
+              'vin': user.vin,
+              'usertank': user.usertank,
+            };
+            auxblock.createuser();
+            await auxblock.postEvent(user.site + ":3000/post/updateuser", data);
+          }
+        }
+      }
     }
 
     var bancoInterno = InternalDatabase();

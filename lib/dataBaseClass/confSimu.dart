@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+
 part 'confSimu.g.dart';
 
 /*
@@ -158,7 +159,6 @@ class Confdata {
   @HiveField(31)
   bool velo = true;
 
-  
   Confdata({
     required this.rpmmax,
     required this.rpmmin,

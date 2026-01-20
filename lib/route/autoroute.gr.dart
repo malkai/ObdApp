@@ -63,6 +63,58 @@ class Configurepage extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [eventListPath]
+class EventListPath extends PageRouteInfo<EventListPathArgs> {
+  EventListPath({
+    required dynamic event,
+    required int index,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
+          EventListPath.name,
+          args: EventListPathArgs(
+            event: event,
+            index: index,
+            key: key,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'EventListPath';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<EventListPathArgs>();
+      return eventListPath(
+        event: args.event,
+        index: args.index,
+        key: args.key,
+      );
+    },
+  );
+}
+
+class EventListPathArgs {
+  const EventListPathArgs({
+    required this.event,
+    required this.index,
+    this.key,
+  });
+
+  final dynamic event;
+
+  final int index;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'EventListPathArgs{event: $event, index: $index, key: $key}';
+  }
+}
+
+/// generated route for
 /// [getallpids]
 class Getallpids extends PageRouteInfo<void> {
   const Getallpids({List<PageRouteInfo>? children})
@@ -115,6 +167,25 @@ class Loadingpage extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const loadingpage();
+    },
+  );
+}
+
+/// generated route for
+/// [marketplace]
+class Marketplace extends PageRouteInfo<void> {
+  const Marketplace({List<PageRouteInfo>? children})
+      : super(
+          Marketplace.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'Marketplace';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const marketplace();
     },
   );
 }

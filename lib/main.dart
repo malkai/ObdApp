@@ -9,11 +9,11 @@ import 'package:obdapp/dataBaseClass/obdRawData.dart';
 import 'package:obdapp/dataBaseClass/pidDiscoveryClass.dart';
 import 'package:obdapp/dataBaseClass/vehiclesUser.dart';
 import 'package:obdapp/functions/InternalDatabase.dart';
+import 'package:obdapp/functions/blockchain.dart';
 
 import 'package:obdapp/route/autoroute.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'functions/firebaseOptions.dart';
 import 'package:path_provider/path_provider.dart' as path_prov;
 
 //
@@ -22,8 +22,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final diretorioUsuario = await path_prov.getApplicationDocumentsDirectory();
+
+  blockchain auxblock = blockchain();
+  auxblock.createuser();
   await Hive.initFlutter(diretorioUsuario.path);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   Hive.registerAdapter(UserdataAdapter());
   Hive.registerAdapter(UserVehicleRawAdapter());
   Hive.registerAdapter(UserDataProcessAdapter());
@@ -39,6 +41,7 @@ Future<void> main() async {
   Hive.registerAdapter(walletAdapter());
   Hive.registerAdapter(EventAdapter());
   Hive.registerAdapter(PathBlockchainAdapter());
+  Hive.registerAdapter(UserScoreAdapter());
   var bancoInterno = InternalDatabase();
   bancoInterno.init();
   await Hive.openBox<Confdata>('conf');
@@ -95,3 +98,12 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+
+//0x4288201baC903F84648E81A07F793C9E7d893692
+//casa
+//http://192.168.1.152
+//inmetro
+//http://10.26.109.134
+//WBAGH8348YD559494
+//40
