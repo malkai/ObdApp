@@ -64,8 +64,8 @@ class blockchain {
       'wallet': useradd,
     };
     if (user.blockchain) {
-      if (await connect.getserver(help + ":3000") != "") {
-        String resp = await connect.postEvent("$help:3000/get/score", data);
+      if (await connect.getserver(help + "/jwtserver/") != "") {
+        String resp = await connect.postEvent("$help/jwtserver/get/score", data);
         final decoded = json.decode(resp);
 
         if (decoded != "contrato não existente") {
@@ -163,7 +163,7 @@ class blockchain {
     Map<String, dynamic> data = {
       'wallet': useradd,
     };
-    String resp = await connect.postEvent("$help:3000/get/event/close", data);
+    String resp = await connect.postEvent("$help/jwtserver/get/event/close", data);
 
     final decoded = json.decode(resp);
     print(decoded);
@@ -190,9 +190,9 @@ class blockchain {
       userpathc.clear();
 
       if (eventlist.isNotEmpty) {
-        if (await connect.getserver(help + ":3000") != "") {
+        if (await connect.getserver(help + "/jwtserver/") != "") {
           String resp =
-              await connect.postEvent("$help:3000/get/path/close", data);
+              await connect.postEvent("$help/jwtserver/get/path/close", data);
 
           final decoded = json.decode(resp);
           if (decoded.isNotEmpty) {
@@ -243,11 +243,11 @@ class blockchain {
     Map<String, dynamic> data = {
       'wallet': useradd,
     };
-    String resp = await connect.postEvent("$help:3000/get/contract", data);
+    String resp = await connect.postEvent("$help/jwtserver/get/contract", data);
 
-    if (await connect.getserver(help + ":3000") != "" &&
+    if (await connect.getserver(help + "/jwtserver/") != "" &&
         resp != "Não existe contrato") {
-      String resp = await connect.postEvent("$help:3000/get/event/open", data);
+      String resp = await connect.postEvent("$help/jwtserver/get/event/open", data);
       if (resp != "Não existe evento aberto" ||
           resp != "contrato não existente") {
         try {
@@ -271,9 +271,9 @@ class blockchain {
         }
 
         if (eventVar.id != -1) {
-          if (await connect.getserver(help + ":3000") != "") {
+          if (await connect.getserver(help + "/jwtserver/") != "") {
             String resp =
-                await connect.postEvent("$help:3000/get/path/open", data);
+                await connect.postEvent("$help/jwtserver/get/path/open", data);
             print("oii");
             print(resp);
             final decoded = json.decode(resp);
@@ -326,7 +326,7 @@ class blockchain {
           usertank: "",
           abastecimento: "");
 
-      resp = await connect.postEvent("$help:3000/get/event/close", data);
+      resp = await connect.postEvent("$help/jwtserver/get/event/close", data);
       final decoded = json.decode(resp);
 
       if (decoded != "Não existe evento fechado") {
@@ -353,9 +353,9 @@ class blockchain {
         userpathc.clear();
 
         if (eventlist.isNotEmpty) {
-          if (await connect.getserver(help + ":3000") != "") {
+          if (await connect.getserver(help + "/jwtserver/") != "") {
             String resp =
-                await connect.postEvent("$help:3000/get/path/close", data);
+                await connect.postEvent("$help/jwtserver/get/path/close", data);
 
             final decoded = json.decode(resp);
             print(decoded);
@@ -434,7 +434,7 @@ class blockchain {
     userdata = await Hive.openBox<wallet>('wallet');
     wallet user = userdata.getAt(0);
 
-    final uri = Uri.parse("${user.site}:3000/send/data/vehicle");
+    final uri = Uri.parse("${user.site}/jwtserver/send/data/vehicle");
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -481,17 +481,17 @@ class blockchain {
 }
 
 
-//curl -X POST http://localhost:3000/create/contract
-//curl -X POST http://localhost:3000/get/contract
-//curl -X POST http://localhost:3000/create/event
-//curl -X POST http://localhost:3000/close/event
-//curl -X POST http://localhost:3000/close/event
-//curl -X POST http://localhost:3000/get/event/open
-//curl -X POST http://localhost:3000/create/event
-//curl -X POST http://localhost:3000/get/event/open
+//curl -X POST http://localhost/jwtserver/create/contract
+//curl -X POST http://localhost/jwtserver/get/contract
+//curl -X POST http://localhost/jwtserver/create/event
+//curl -X POST http://localhost/jwtserver/close/event
+//curl -X POST http://localhost/jwtserver/close/event
+//curl -X POST http://localhost/jwtserver/get/event/open
+//curl -X POST http://localhost/jwtserver/create/event
+//curl -X POST http://localhost/jwtserver/get/event/open
 //./test.sh
-//curl -X POST http://localhost:3000/get/event/close
-//curl -X POST http://localhost:3000/get/path/open
-//curl -X POST http://localhost:3000/get/path/close
-//curl -X POST http://localhost:3000/get/score
-//curl -X POST http://localhost:3000/get/coin
+//curl -X POST http://localhost/jwtserver/get/event/close
+//curl -X POST http://localhost/jwtserver/get/path/open
+//curl -X POST http://localhost/jwtserver/get/path/close
+//curl -X POST http://localhost/jwtserver/get/score
+//curl -X POST http://localhost/jwtserver/get/coin

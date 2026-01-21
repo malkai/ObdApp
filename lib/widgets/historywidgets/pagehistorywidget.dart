@@ -236,7 +236,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                     'wallet': user.add,
                   };
                   blockchain auxblock = blockchain();
-                  auxblock.postEvent("${user.site}:3000/close/event", data);
+                  auxblock.postEvent("${user.site}/jwtserver/close/event", data);
                   await auxblock.getpaths(user.add).then((Obj) async {
                     // This code runs after fetchUserData completes successfully
                     userpathopen = [];
@@ -263,7 +263,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                     'wallet': user.add,
                   };
                   blockchain auxblock = blockchain();
-                  auxblock.postEvent("${user.site}:3000/get/coin", data);
+                  auxblock.postEvent("${user.site}/jwtserver/get/coin", data);
                   await auxblock.getpaths(user.add).then((Obj) async {
                     // This code runs after fetchUserData completes successfully
                     await init();
@@ -279,5 +279,5 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   }
 }
 
-//http://10.26.107.136:3000
+//http://10.26.107.136/jwtserver
 //0x4288201baC903F84648E81A07F793C9E7d893692

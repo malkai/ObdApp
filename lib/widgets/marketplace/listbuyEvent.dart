@@ -90,9 +90,9 @@ class _ListEventbuyState extends State<ListEventbuy> {
               
               if (user.blockchain) {
                 if (userdata.isNotEmpty &&
-                    await auxblock.checkServerStatus(user.site + ":3000/")) {
+                    await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
                   var response = await auxblock
-                      .getserver(user.site + ":3000/get/sendcontract");
+                      .getserver(user.site + "/jwtserver/get/sendcontract");
 
                   // 2. Correctly convert the address string to an EthereumAddress.
                   final contractAddress =

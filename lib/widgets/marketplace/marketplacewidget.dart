@@ -40,9 +40,9 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
       if (user.blockchain) {
         //print(await auxblock.checkconnection(www.google.com));
 
-        if (await auxblock.checkServerStatus(user.site + ":3000/")) {
+        if (await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
           var response =
-              await auxblock.getserver(user.site + ":3000/get/users");
+              await auxblock.getserver(user.site + "/jwtserver/get/users");
 
           print("Resposta");
           print(response);
@@ -157,9 +157,9 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
 
                 if (user.blockchain) {
                   if (userdata.isNotEmpty &&
-                      await auxblock.checkServerStatus(user.site + ":3000/")) {
+                      await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
                     var response = await auxblock
-                        .getserver(user.site + ":3000/get/sendcontract");
+                        .getserver(user.site + "/jwtserver/get/sendcontract");
 
                     // 2. Correctly convert the address string to an EthereumAddress.
                     final contractAddress =
@@ -355,8 +355,8 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
       var aux = await storage.read(key: 'privatekey');
       print(aux);
 
-      //print(await auxblock.getserver(user.site+":3000"));
-      if (await auxblock.checkServerStatus(user.site + ":3000/") &&
+      //print(await auxblock.getserver(user.site+"/jwtserver"));
+      if (await auxblock.checkServerStatus(user.site + "/jwtserver/") &&
           aux != null) {
         String? help = aux;
         String rpc = user.site;
@@ -373,7 +373,7 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
         Map<String, dynamic> data = {
           'wallet': user.add,
         };
-        auxblock.postEvent(user.site + ":3000/receive", data);
+        auxblock.postEvent(user.site + "/jwtserver/receive", data);
         Future.delayed(const Duration(seconds: 5)).then((value) => {getfund()});
       }
     }
@@ -388,8 +388,8 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
       final storage = FlutterSecureStorage();
       var aux = await storage.read(key: 'privatekey');
 
-      //print(await auxblock.getserver(user.site+":3000"));
-      if (await auxblock.checkServerStatus(user.site + ":3000/") &&
+      //print(await auxblock.getserver(user.site+"/jwtserver"));
+      if (await auxblock.checkServerStatus(user.site + "/jwtserver/") &&
           aux != null) {
         String blockchain = user.site;
 

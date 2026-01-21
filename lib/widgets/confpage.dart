@@ -117,7 +117,7 @@ class _ConfwidgetState extends State<Confwidget> {
 
     bool canProceed = true;
     if (blockchainbool &&
-        await auxblock.checkServerStatus(user.site + ":3000/")) {
+        await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
       String help = user.site;
 
       final storage = FlutterSecureStorage();
@@ -126,20 +126,20 @@ class _ConfwidgetState extends State<Confwidget> {
         user.add = aux2;
       }
 
-      if (await connect.getserver(help + ":3000") == "") {
+      if (await connect.getserver(help + "/jwtserver/") == "") {
         canProceed = false;
         text = "Servidor invalido";
       }
 
       print("antes de enviar");
 
-      print(await auxblock.postEvent("$help:3000/get/user", data));
+      print(await auxblock.postEvent("$help/jwtserver/get/user", data));
 
       print(user.usertank is int);
 
       int? tank = int.tryParse(user.usertank);
 
-      if (await auxblock.postEvent(user.site + ":3000/get/user", data) ==
+      if (await auxblock.postEvent(user.site + "/jwtserver/get/user", data) ==
               "Existe" &&
           canProceed) {
         if (user.vin == "") {
@@ -149,7 +149,7 @@ class _ConfwidgetState extends State<Confwidget> {
           canProceed = false;
           text = "Tanque de comb somente números inteiro ";
         } else if (canProceed) {
-          await auxblock.postEvent("$help:3000/post/updateuser", data);
+          await auxblock.postEvent("$help/jwtserver/post/updateuser", data);
           await auxblock.getpaths(user.add);
           auxblock.getscore(user.add);
         }
@@ -163,7 +163,7 @@ class _ConfwidgetState extends State<Confwidget> {
           canProceed = false;
           text = "Tanque de comb  somente números inteiro ";
         } else {
-          await auxblock.postEvent("$help:3000/create/contract", data);
+          await auxblock.postEvent("$help/jwtserver/create/contract", data);
           await auxblock.getpaths(user.add);
           auxblock.getscore(user.add);
         }

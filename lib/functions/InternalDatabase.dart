@@ -119,7 +119,7 @@ class InternalDatabase {
           time2.difference(time1).inSeconds > 60 ||
           i == process.length - 1) {
         if (user.blockchain) {
-          if (await auxblock.checkServerStatus(user.site + ":3000")) {
+          if (await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
             try {
            
 
