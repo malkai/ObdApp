@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:obdapp/dataBaseClass/blockchainid.dart';
 import 'package:obdapp/widgets/MapGpswidget.dart';
 import 'package:obdapp/widgets/accxyzpage.dart';
 
@@ -45,11 +46,13 @@ class _ConnectState extends State<Data_Connect> {
   List data = [];
   List<ObdRawData> _responses = [];
   List<Userdata> savejson = [];
+  List<LatLng> points = [];
+
   ObdData vin = ObdData(response: '', title: '', unit: '');
   MainAxisAlignment aligm = MainAxisAlignment.center;
 
   bool teste = true;
-  List<LatLng> points = [];
+
   Timer t = Timer(Duration(seconds: 0), () {});
   Timer t2 = Timer(Duration(seconds: 0), () {});
 
@@ -142,17 +145,18 @@ class _ConnectState extends State<Data_Connect> {
             },
   */
 
-  PositionClass getGps() {
+  PositionClass getGps(PositionClass pc) {
     GeoPoint actualPosition =
         GeoPoint(_position!.latitude, _position!.longitude);
-    PositionClass pc =
-        PositionClass(lat: _position!.latitude, long: _position!.longitude);
+
+    PositionClass pc = PositionClass(
+        lat: actualPosition.latitude, long: actualPosition.longitude);
     pc.lat = roundDouble(actualPosition.latitude, 4);
     pc.long = roundDouble(actualPosition.longitude, 4);
     LatLng aux = LatLng(roundDouble(actualPosition.latitude, 4),
         roundDouble(actualPosition.longitude, 4));
 
-    if (pc.lat != 0.0 && pc.long != 0.0) {
+    if (actualPosition.latitude != 0.0 && actualPosition.longitude != 0.0) {
       if (points.length > 1 && points.length < 2) {
         var distance = Distance();
         //create a new distance calculator with Haversine algorithm
@@ -194,14 +198,18 @@ class _ConnectState extends State<Data_Connect> {
   }
 
   void simuobdtime(PositionClass pc, int count) {
-    int count_aux = count;
     Timer.periodic(Duration(seconds: int.parse(confdata!.timereqobd)),
         (timer) async {
+          
+
+      int count_aux = count;
       _timer = timer;
 
-      if (confdata!.gps && _position != null && timer.isActive) {
-        pc = getGps();
-        if (pc.lat != 0.0 && pc.long != 0.0) {
+     
+      if (confdata!.gps && _position != null && timer.isActive ) {
+        pc = getGps(pc);
+
+        if (pc.lat != 0 && pc.long != 0) {
           count_aux -= 1;
         }
         updatemap();
@@ -303,8 +311,12 @@ class _ConnectState extends State<Data_Connect> {
           help1 = ObdRawData(pid: '01 0D', obddata: help2);
           responses1.add(help1);
         }
+        late Box userdata;
+        userdata = await Hive.openBox<wallet>('wallet');
 
-        vin = ObdData(unit: "", title: "VIN", response: confdata!.vin);
+        wallet user = wallet(add: "", name: "");
+        user = userdata.getAt(0);
+        vin = ObdData(unit: "", title: "VIN", response: user.vin);
         //help1 = ObdRawData(pid: '09 02 5', obddata: vin);
         //_responses1.add(help1);
         if (timer.isActive) {
@@ -313,9 +325,16 @@ class _ConnectState extends State<Data_Connect> {
           });
         }
       }
+
       bool a = await checkUserConnection();
 
-      if (count != count_aux) {
+
+   
+
+      if (count_aux == 0) {
+        print("elemento");
+        print({pc.lat, pc.long});
+
         UserDataProcess save = UserDataProcess(
             processada: false,
             isOnline: false,
@@ -326,8 +345,13 @@ class _ConnectState extends State<Data_Connect> {
             time: DateTime.now());
         //var signature = await sign(save).then((signature) => signature);
         //save.signature = signature.toString();
+        late Box userdata;
+        userdata = await Hive.openBox<wallet>('wallet');
+
+        wallet user = wallet(add: "", name: "");
+        user = userdata.getAt(0);
         UserVehicleRaw vehicledata =
-            UserVehicleRaw(userdata: save, vin: vin.response);
+            UserVehicleRaw(userdata: save, vin: user.vin);
 
         Userdata tobesaved =
             Userdata(name: uniqueid!, uservehicle: vehicledata);
@@ -343,18 +367,14 @@ class _ConnectState extends State<Data_Connect> {
         }
       }
       comb = comb - 0.001;
-
-      await Future.delayed(
-        Duration(seconds: int.parse(confdata!.timereqobd)),
-      );
     });
   }
 
-  void obdinfo(PositionClass? pc, int count) async {
+  void obdinfo(PositionClass pc, int count) async {
     if (!(await widget.obd2.isListenToDataInitialed)) {
       widget.obd2.setOnDataReceived((command, response, requestCode) async {
         if (confdata!.gps && _position != null) {
-          pc = getGps();
+          pc = getGps(pc);
           updatemap;
         }
 
@@ -396,16 +416,21 @@ class _ConnectState extends State<Data_Connect> {
               time: DateTime.now());
           var signature = await sign(save).then((signature) => signature);
           save.signature = signature.toString();
+          late Box userdata;
+          userdata = await Hive.openBox<wallet>('wallet');
+
+          wallet user = wallet(add: "", name: "");
+          user = userdata.getAt(0);
+
           UserVehicleRaw vehicledata =
-              UserVehicleRaw(userdata: save, vin: confdata!.name);
-          if (vin.response != '') {
-            vehicledata = UserVehicleRaw(userdata: save, vin: vin.response);
-          }
+              UserVehicleRaw(userdata: save, vin: user.vin);
 
           Userdata tobesaved =
               Userdata(name: uniqueid!, uservehicle: vehicledata);
           savejson.add(tobesaved);
+
           var userd = tobesaved.toJson();
+          print(userd);
           data.add(userd);
 
           if (save.isOnline) {
@@ -620,6 +645,12 @@ int j = 1;
       var bancoInterno = InternalDatabase();
       bancoInterno.init();
 
+      late Box userdata;
+      userdata = await Hive.openBox<wallet>('wallet');
+
+      wallet user = wallet(add: "", name: "");
+      user = userdata.getAt(0);
+
       var a = Confdata(
           rpmmin: 750,
           rpmmax: 10000,
@@ -629,7 +660,7 @@ int j = 1;
           templamax: 104.4,
           pressmin: 14.7,
           pressmax: 101,
-          vin: '1GBJC34R9XF017297',
+          vin: user.vin,
           tempaemin: 30,
           tempaemax: 70,
           mafmin: 400,
@@ -736,10 +767,15 @@ int j = 1;
     if (_positionStream != null) {
       _positionStream!.cancel();
     }
-    points.clear();
+
     if (_timer != null) {
       _timer!.cancel();
     }
+
+    data.clear();
+    _responses.clear();
+    savejson.clear();
+    points.clear();
 
     await widget.obd2.connection?.close();
     await widget.obd2.connection?.finish();

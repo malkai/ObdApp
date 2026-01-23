@@ -67,7 +67,16 @@ class _AppLoadingState extends State<AppLoading> {
       blockchain auxblock = blockchain();
       if (user.blockchain) {
         if (await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
-          if (await auxblock.postEvent(user.site + "/jwtserver/",data) == "Existe") {
+          print(await auxblock
+                  .postEvent(user.site + "/jwtserver/get/user", data)
+                  .toString() ==
+              "Existe");
+
+          var hString = jsonDecode(await auxblock.postEvent(
+              user.site + "/jwtserver/get/user", data));
+         
+          if (hString ==
+              "Existe") {
             await auxblock.getpaths(user.add);
             auxblock.getscore(user.add);
           } else {
@@ -77,7 +86,8 @@ class _AppLoadingState extends State<AppLoading> {
               'usertank': user.usertank,
             };
             auxblock.createuser();
-            await auxblock.postEvent(user.site + "/jwtserver/post/updateuser", data);
+            await auxblock.postEvent(
+                user.site + "/jwtserver/post/updateuser", data);
           }
         }
       }

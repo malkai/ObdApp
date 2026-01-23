@@ -81,7 +81,7 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
                       await Hive.openBox<Event>('buypath' + listadd[i].add);
                   var listuser = userpathc.values.toList();
                   for (int i = 0; i < listuser.length; i++) {
-                    buypath.add(listuser[i]);
+                    if (listuser[i].paths.length > 0) buypath.add(listuser[i]);
                   }
                   //buypath.add(listuser);
                 }
@@ -157,7 +157,8 @@ class _MarketPlaceWidgetState extends State<MarketPlaceWidget> {
 
                 if (user.blockchain) {
                   if (userdata.isNotEmpty &&
-                      await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
+                      await auxblock
+                          .checkServerStatus(user.site + "/jwtserver/")) {
                     var response = await auxblock
                         .getserver(user.site + "/jwtserver/get/sendcontract");
 

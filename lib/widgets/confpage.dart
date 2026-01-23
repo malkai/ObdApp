@@ -183,7 +183,7 @@ class _ConfwidgetState extends State<Confwidget> {
       await confapp.putAt(0, confdata);
       _showMyDialog();
       if (blockcainvalueant != blockchainbool) {
-        await Future.delayed(Duration(seconds: 2));
+        await Future.delayed(Duration(seconds: 15));
 
         context.router.replace(Loadingpage());
       }

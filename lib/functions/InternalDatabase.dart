@@ -62,10 +62,13 @@ class InternalDatabase {
     }
   }
 
-  void insertObdData(var data) async {
+  void insertObdData(Userdata data) async {
     var obdData = await Hive.openBox<Userdata>('obdData');
-    if (obdData.containsKey(data) == false) {
-      obdData.add(data);
+    if (data.uservehicle.userdata.pos?.lat != 0.0 &&
+        data.uservehicle.userdata.pos?.long != 0.0) {
+      if (obdData.containsKey(data) == false) {
+        obdData.add(data);
+      }
     }
   }
 
@@ -91,7 +94,7 @@ class InternalDatabase {
     return 0;
   }
 
-  void processingdataOBD(var process, var keys) async {
+  void processingdataOBD(List<Userdata> process, var keys) async {
     blockchain auxblock = blockchain();
     Box userdata = await Hive.openBox<wallet>('wallet');
 
@@ -101,11 +104,10 @@ class InternalDatabase {
     DateTime time1 = DateTime.parse('2020-01-02 03:04:05');
     DateTime time2 = DateTime.parse('2020-01-02 03:04:05');
 
-    var helplist = [];
+    List<dynamic> helplist = [];
 
     int j_quebra = 0;
     for (int i = 0; i < process.length; i++) {
-      helplist.add(process[i]);
       if (vin == '') {
         vin = process[i].uservehicle.vin;
       }
@@ -121,16 +123,25 @@ class InternalDatabase {
         if (user.blockchain) {
           if (await auxblock.checkServerStatus(user.site + "/jwtserver/")) {
             try {
-           
+              print("envia");
+              if (helplist.length > 1) {
+                Response aux2 = await auxblock.sendata(helplist).timeout(
+                  const Duration(seconds: 5),
+                  onTimeout: () {
+                    // Time has run out, do what you wanted to do.
+                    return Response(
+                        'Error', 408); // Request Timeout response status code
+                  },
+                );
+              }
 
-              Response aux2 = await auxblock.sendata(helplist).timeout(
-                const Duration(seconds: 5),
-                onTimeout: () {
-                  // Time has run out, do what you wanted to do.
-                  return Response(
-                      'Error', 408); // Request Timeout response status code
-                },
-              );
+              for (int aux = j_quebra; aux < i; aux++) {
+                process[aux].uservehicle.userdata.processada = true;
+
+                Box obdData = await Hive.openBox<Userdata>('obdData');
+
+                await obdData.putAt(process[aux].key, process[aux]);
+              }
             } catch (e) {
               print(e);
               print("servidor de envio fora do ar");
@@ -142,7 +153,7 @@ class InternalDatabase {
 
             Box obdData = await Hive.openBox<Userdata>('obdData');
 
-            //await obdData.putAt(process[aux].key, process[aux]);
+            await obdData.putAt(process[aux].key, process[aux]);
           }
         }
 
@@ -150,6 +161,7 @@ class InternalDatabase {
 
         helplist.clear();
       }
+      helplist.add(process[i].toJson());
     }
   }
 }

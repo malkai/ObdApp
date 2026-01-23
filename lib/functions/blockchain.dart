@@ -8,6 +8,7 @@ import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:obdapp/dataBaseClass/blockchainid.dart';
+import 'package:obdapp/dataBaseClass/obdRawData.dart';
 import 'package:web3dart/web3dart.dart';
 
 class blockchain {
@@ -64,8 +65,11 @@ class blockchain {
       'wallet': useradd,
     };
     if (user.blockchain) {
+      print("Oi");
       if (await connect.getserver(help + "/jwtserver/") != "") {
-        String resp = await connect.postEvent("$help/jwtserver/get/score", data);
+        String resp =
+            await connect.postEvent("$help/jwtserver/get/score", data);
+
         final decoded = json.decode(resp);
 
         if (decoded != "contrato não existente") {
@@ -161,12 +165,16 @@ class blockchain {
         abastecimento: "");
 
     Map<String, dynamic> data = {
-      'wallet': useradd,
+      'wallet': useradd.toLowerCase(),
     };
-    String resp = await connect.postEvent("$help/jwtserver/get/event/close", data);
+
+    print(data);
+    String resp =
+        await connect.postEvent("$help/jwtserver/get/event/close", data);
 
     final decoded = json.decode(resp);
     print(decoded);
+
     if (decoded != "Não existe evento fechado") {
       print("oi");
 
@@ -195,22 +203,27 @@ class blockchain {
               await connect.postEvent("$help/jwtserver/get/path/close", data);
 
           final decoded = json.decode(resp);
-          if (decoded.isNotEmpty) {
-            List<PathBlockchain> pathlist = [];
+          if (decoded.isNotEmpty && decoded.toString() != "[]") {
             for (int j = 0; j < decoded.length; j++) {
               var aux = decoded[j]["listtrajetos"];
+
               eventlist[j].value = decoded[j]["value"];
-              for (int i = 0; i < aux.length; i++) {
-                PathBlockchain pathvar = PathBlockchain(
-                    fuel: aux[i]["fuel"],
-                    dist: aux[i]["dist"],
-                    time: aux[i]["time"],
-                    timeless: aux[i]["timeless"]);
-                eventlist[j].paths.add(pathvar);
+              if (aux.length > 0) {
+                for (int i = 0; i < aux.length; i++) {
+                  PathBlockchain pathvar = PathBlockchain(
+                      fuel: aux[i]["fuel"],
+                      dist: aux[i]["dist"],
+                      time: aux[i]["time"],
+                      timeless: aux[i]["timeless"]);
+                  eventlist[j].paths.add(pathvar);
+                }
               }
             }
+          } else {
+            print("oi");
           }
         }
+
         userpathc.addAll(eventlist);
       }
     } else {
@@ -247,7 +260,8 @@ class blockchain {
 
     if (await connect.getserver(help + "/jwtserver/") != "" &&
         resp != "Não existe contrato") {
-      String resp = await connect.postEvent("$help/jwtserver/get/event/open", data);
+      String resp =
+          await connect.postEvent("$help/jwtserver/get/event/open", data);
       if (resp != "Não existe evento aberto" ||
           resp != "contrato não existente") {
         try {
@@ -343,7 +357,6 @@ class blockchain {
               fuel_E: decoded[i]["fuel_e"],
               usertank: decoded[i]["usertank"],
               abastecimento: decoded[i]["abastecimento"]);
-              
 
           //print(decoded[i]);
           eventVar.value = "0.0";
@@ -418,6 +431,8 @@ class blockchain {
         body: json.encode(data),
       );
 
+      print(response.body);
+
       if (response.statusCode == 200) {
         return (response.body);
       } else {
@@ -429,54 +444,47 @@ class blockchain {
     }
   }
 
-  Future<Response> sendata(var helplist) async {
+  Future<Response> sendata(List<dynamic> helplist) async {
     late Box userdata;
+
     userdata = await Hive.openBox<wallet>('wallet');
+
     wallet user = userdata.getAt(0);
+
+    print(helplist);
+
+    List<dynamic> help2 = [];
+
+    Map<String, dynamic> data = {
+      'Data': DateTime.now().toString(),
+      'wallet': user.add,
+      'data': helplist,
+    };
 
     final uri = Uri.parse("${user.site}/jwtserver/send/data/vehicle");
     final headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'Accept': 'application/json', // Indicate what kind of response you expect
     };
+    //final enCodedJson = utf8.encode(jsonEncode(body.toString()));
+    //final gZipJson = gzip.encode(enCodedJson);
+    //final base64Json = base64.encode(gZipJson);
 
-    // Prepare streamed request
-    final request = http.StreamedRequest('POST', uri);
+    Response response = await post(
+      uri,
+      headers: headers,
+      body: jsonEncode(data),
+    );
 
-    request.headers.addAll(headers);
+    print(jsonEncode(data));
 
-    // Start writing JSON structure manually to avoid loading it all at once
-    // {
-    //   "Data": "...",
-    //   "wallet": "...",
-    //   "data": [...]
-    // }
+    print(await response.body);
 
-    request.sink.add(utf8
-        .encode('{"Data":"${DateTime.now()}","wallet":"${user.add}","data":['));
-
-    bool first = true;
-    for (final item in helplist) {
-      if (!first) {
-        request.sink.add(utf8.encode(','));
-      } else {
-        first = false;
-      }
-      request.sink.add(utf8.encode(json.encode(item)));
-      await Future.delayed(Duration.zero); // yield async loop control
+    if (response.statusCode == 200) {
+      return response;
+    } else {
+      return response;
     }
-
-    request.sink.add(utf8.encode(']}'));
-    await request.sink.close();
-    print(request);
-
-    // Send request
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
-    print(response);
-
-    return response;
   }
 }
 
